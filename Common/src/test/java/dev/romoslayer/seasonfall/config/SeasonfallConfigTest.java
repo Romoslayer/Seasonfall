@@ -23,6 +23,14 @@ class SeasonfallConfigTest {
 	}
 
 	@Test
+	void pauseWhenEmptyIsOnUnlessTurnedOff() {
+		assertTrue(parse("{}", new Problems()).general.pauseWhenEmpty);
+		// A file from before the option existed still gets it
+		assertTrue(parse("{ general: { enabled: true } }", new Problems()).general.pauseWhenEmpty);
+		assertFalse(parse("{ general: { pauseWhenEmpty: false } }", new Problems()).general.pauseWhenEmpty);
+	}
+
+	@Test
 	void writtenFileReadsBackTheSame() {
 		SeasonfallConfig defaults = SeasonfallConfig.defaults();
 		String written = SeasonfallConfig.serialize(defaults);

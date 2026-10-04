@@ -73,6 +73,11 @@ public final class SeasonfallConfig {
 		public boolean enabled = true;
 		@Comment("Whether the year moves on with the overworld's time of day. When false, the season stays where it is.")
 		public boolean seasonCycleEnabled = true;
+		@Comment("""
+				Hold the year while nobody is online, so the seasons only pass while people are playing. A server normally stops
+				ticking anyway once it has been empty for pause-when-empty-seconds (server.properties, 60 by default); this also
+				covers servers set to keep running with nobody on.""")
+		public boolean pauseWhenEmpty = true;
 		@Comment("The season a new world starts in.")
 		public String startingSeason = Season.SPRING.id();
 	}

@@ -72,7 +72,8 @@ public final class SeasonClock {
 		SeasonfallConfig config = SeasonfallConfig.get();
 
 		long clockTime = this.overworldClockTime();
-		if (this.lastClockTime != NO_CLOCK && !this.state.paused && config.general.enabled && config.general.seasonCycleEnabled) {
+		if (this.lastClockTime != NO_CLOCK && !this.state.paused && config.general.enabled && config.general.seasonCycleEnabled
+				&& !this.waitingForPlayers()) {
 			long elapsed = clockTime - this.lastClockTime;
 			// Time only moves forwards: setting the clock back (/time set) leaves the year where it is
 			if (elapsed > 0) {
@@ -151,6 +152,11 @@ public final class SeasonClock {
 
 	public boolean isPaused() {
 		return this.state.paused;
+	}
+
+	/** Whether the year is holding because nobody is online ({@code general.pauseWhenEmpty}). */
+	public boolean waitingForPlayers() {
+		return SeasonfallConfig.get().general.pauseWhenEmpty && this.server.getPlayerCount() == 0;
 	}
 
 	public void configReloaded() {

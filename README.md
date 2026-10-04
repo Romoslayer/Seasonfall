@@ -75,7 +75,7 @@ The year is saved in `seasonfall.json` in the world folder and survives restarts
 `config/seasonfall.json` is written on first start with a comment above every option. `/seasonfall reload` applies
 changes. Main sections:
 
-- `general`: on/off, whether the year advances, starting season
+- `general`: on/off, whether the year advances, whether it waits while nobody is online (`pauseWhenEmpty`, on by default), starting season
 - `seasonLength`: days per season (24 each by default)
 - `dimensions`: which dimensions have seasons (overworld only by default)
 - `temperature`: the yearly temperature curve
@@ -164,12 +164,17 @@ recorded is assumed to have passed at the normal pace.
 ### Elapsed
 
 [Elapsed](../Elapsed) (offline progression) finds Seasonfall on its own, with no extra setup on either side. A crop left
-unloaded grows by the seasons the year went through while it was unloaded, pauses included: a field left alone through
+unloaded grows by the seasons the year went through while it was unloaded, pauses included (also the time the year
+waited with nobody online): a field left alone through
 winter comes back with about a third of the growth of one left alone through summer. If Elapsed is set to count real
 time while the server was off, that time is treated as game time before the absence (the year does not move while the
 server is off), which is an approximation. Elapsed's `[seasonfall] integrationEnabled` option turns the link off.
 
 ## Things to know
+
+- The year only moves while someone is online (`general.pauseWhenEmpty`, on by default). Most servers stop ticking
+  anyway once empty (`pause-when-empty-seconds` in `server.properties`); this also holds the year on servers that keep
+  running. Turn it off to let the seasons pass on an empty server that keeps running.
 
 - Seasonal day length takes over the overworld clock's speed (`/time rate`). Turn off `dayLength.seasonalDayLength` if
   you use `/time rate` yourself.

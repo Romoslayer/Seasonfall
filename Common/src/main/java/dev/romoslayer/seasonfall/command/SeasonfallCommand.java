@@ -74,6 +74,8 @@ public final class SeasonfallCommand {
 				progress * 100.0F, BiomeSync.stage(progress, SeasonfallConfig.get().visuals.foliageStages) + 1, SeasonfallConfig.get().visuals.foliageStages, DayLength.daytimeMultiplier(progress))));
 		if (clock.isPaused()) {
 			send(source, Component.literal("The year is paused.").withStyle(ChatFormatting.YELLOW));
+		} else if (clock.waitingForPlayers()) {
+			send(source, Component.literal("The year waits while nobody is online.").withStyle(ChatFormatting.YELLOW));
 		}
 
 		ServerLevel level = source.getLevel();
