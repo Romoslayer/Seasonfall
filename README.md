@@ -19,6 +19,7 @@ responds according to its own climate.
 | **Foliage and grass** | Seasonal tints per biome style: light yellow-green spring leaves, deep summer green, autumn yellow-orange-brown leaves over olive-tawny grass, grey winter leaves and grass. Evergreen, tropical and arid biomes change much less. |
 | **Crops and plants** | Growth speed multipliers by crop group (default, warm-season, cool-season, general vegetation), scaled by how seasonal the local biome is. Crops under glass grow at least at normal speed all year. |
 | **Day length** | Longer days in summer, longer nights in winter. A full day still takes 24000 ticks. |
+| **Empty server** | The year waits while nobody is online and carries on when someone joins; the server itself keeps running. On by default (`general.pauseWhenEmpty`). |
 | **Vanilla weather** | Without Stormcell, rain and thunderstorms become more or less frequent through the year. |
 | **Stormcell API** | Seasonal climate modifiers (temperature offset, humidity, precipitation, storm probability) for the Stormcell weather mod to use. Seasonfall never simulates weather itself. |
 
