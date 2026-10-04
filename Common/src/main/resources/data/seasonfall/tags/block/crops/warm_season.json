@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:melon_stem",
+    "minecraft:pumpkin_stem",
+    "minecraft:cocoa",
+    "minecraft:torchflower_crop",
+    "minecraft:pitcher_crop"
+  ]
+}

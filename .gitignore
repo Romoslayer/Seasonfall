@@ -1,0 +1,71 @@
+# gradle
+
+.gradle/
+build/
+out/
+classes/
+
+# eclipse
+
+*.launch
+
+# idea
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# vscode
+
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
+# macos
+
+*.DS_Store
+
+# fabric
+
+run/
+
+# java
+
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+
+# AI assistant and session handoff files -- local only, never committed
+HANDOFF.md
+HANDOFF*.md
+*.handoff.md
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+AGENTS.md
+GEMINI.md
+.gemini/
+.cursor/
+.cursorrules
+.aider*
+.codex/
+.github/copilot-instructions.md
+runs/
+CLAUDE_HANDOFF.md
+*HANDOFF*.md
+docs/AUDIT*.md
+
+# test run output (tools/test)
+tools/test/*.log
+tools/test/*-Fabric-*.txt
+tools/test/*-NeoForge-*.txt
+tools/test/forest-template.json
+
+# local only
+logs/
+artwork/
+tools/

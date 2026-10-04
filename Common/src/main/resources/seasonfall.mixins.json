@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.romoslayer.seasonfall.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BiomeInvoker",
+    "BiomeMixin",
+    "BlockStateBaseMixin",
+    "IceBlockInvoker",
+    "IceBlockMixin",
+    "RegistrySynchronizationMixin",
+    "ServerLevelMixin",
+    "SnowLayerBlockMixin"
+  ],
+  "client": [
+    "client.BlockColorsMixin",
+    "client.ClientLevelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
