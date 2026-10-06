@@ -43,6 +43,8 @@ processResources {
     // NeoForge pins its first two version components to the game's, so one range covers both
     def mcParts = mc_version.tokenize('.')
     def nextMinecraft = "${mcParts[0]}.${(mcParts[1] as int) + 1}"
+    // Forge numbers its releases on its own, one major per game version: "26.3-66.0.9" -> 66
+    def forgeMajor = forge_version.tokenize('-')[1].tokenize('.')[0] as int
     def expandProps = [
             version              : project.version.toString(),
             mod_id               : mod_id,
@@ -52,12 +54,14 @@ processResources {
             license              : license,
             mc_version           : mc_version,
             neoforge_range       : "[${mc_version},${nextMinecraft})",
+            minecraft_range      : "[${mc_version},${nextMinecraft})",
+            forge_range          : "[${forgeMajor},${forgeMajor + 1})",
             fabric_loader_version: fabric_loader_version,
             fabric_api_version   : fabric_api_version,
             java_version         : java_version
     ]
     inputs.properties(expandProps)
-    filesMatching(['META-INF/neoforge.mods.toml', 'fabric.mod.json', 'pack.mcmeta']) {
+    filesMatching(['META-INF/neoforge.mods.toml', 'META-INF/mods.toml', 'fabric.mod.json', 'pack.mcmeta']) {
         expand expandProps
     }
 }

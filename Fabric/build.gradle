@@ -28,15 +28,15 @@ loom {
 }
 
 
-// A second client with the mod that goes straight to a server on localhost (start one with runServer): shows the
-// live season updates players with Seasonfall installed get
+// A second client with the mod that goes straight to a server on localhost (start one with runServer; -Pserver=host:port
+// for another): shows the live season updates players with Seasonfall installed get
 loom {
     runs {
         moddedClient {
             client()
             setConfigName('Fabric Client (joins localhost)')
             runDir("runs/modded-client-${mc_version}")
-            programArgs('--quickPlayMultiplayer', 'localhost:25565', '--username', 'Modded')
+            programArgs('--quickPlayMultiplayer', findProperty('server') ?: 'localhost:25565', '--username', 'Modded')
         }
     }
 }

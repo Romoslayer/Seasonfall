@@ -1,20 +1,22 @@
 plugins {
     id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
     id 'net.neoforged.moddev' version "${moddev_version}" apply false
+    id 'net.minecraftforge.gradle' version "${forgegradle_version}" apply false
 }
 
 tasks.register('build') {
     group = 'build'
-    description = 'Runs the unit tests and builds the Fabric and NeoForge jars for the selected Minecraft version (-Pmc=26.2 or 26.3).'
-    dependsOn ':Common:test', ':Fabric:build', ':NeoForge:build'
+    description = 'Runs the unit tests and builds the Fabric, NeoForge and Forge jars for the selected Minecraft version (-Pmc=26.2 or 26.3).'
+    dependsOn ':Common:test', ':Fabric:build', ':NeoForge:build', ':Forge:build'
 }
 
 tasks.register('clean', Delete) {
     delete layout.buildDirectory
 }
 
-// ---- gradlew runVanillaClient [-Pmc=26.2]: the official, unmodded game, started the way the Minecraft launcher starts
-// it and sent straight to a server on localhost:25565 (start one with :Fabric:runServer or :NeoForge:runServer). Shows
+// ---- gradlew runVanillaClient [-Pmc=26.2] [-Pserver=localhost:25566]: the official, unmodded game, started the way the
+// Minecraft launcher starts it and sent straight to a server (default localhost:25565; start one with :Fabric:runServer,
+// :NeoForge:runServer or :Forge:runServer). Shows
 // what players without the mod see. Game files come from your launcher installation or Gradle's cache and are each
 // checked against the SHA-1 Mojang lists for them. Plays offline as "Visitor" in its own folder (build/run/vanilla).
 def minecraftDir = new File(System.getenv('APPDATA') ?: System.getProperty('user.home'), '.minecraft')
@@ -40,7 +42,7 @@ def appliesHere = { List rules ->
 
 tasks.register('runVanillaClient') {
 	group = 'verification'
-	description = 'Starts the official, unmodded Minecraft client and joins localhost:25565.'
+	description = 'Starts the official, unmodded Minecraft client and joins localhost:25565 (or -Pserver=host:port).'
 	doLast {
 		def version = mc_version
 		def gameDir = layout.buildDirectory.dir("run/vanilla-${version}").get().asFile
@@ -73,7 +75,7 @@ tasks.register('runVanillaClient') {
 		def offlineUuid = UUID.nameUUIDFromBytes('OfflinePlayer:Visitor'.getBytes('UTF-8')).toString().replace('-', '')
 		def gameArgs = ['--username', 'Visitor', '--version', version, '--gameDir', gameDir.path, '--assetsDir', assets[0].path,
 				'--assetIndex', assets[1], '--uuid', offlineUuid, '--accessToken', '0', '--versionType', 'release',
-				'--width', '1280', '--height', '720', '--quickPlayMultiplayer', 'localhost:25565']
+				'--width', '1280', '--height', '720', '--quickPlayMultiplayer', findProperty('server') ?: 'localhost:25565']
 
 		gameDir.mkdirs()
 		def options = new File(gameDir, 'options.txt')

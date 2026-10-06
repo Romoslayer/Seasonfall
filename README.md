@@ -1,6 +1,6 @@
 # Seasonfall
 
-A server-side seasons mod for Minecraft **26.2 and 26.3**, on **Fabric and NeoForge**. Players join with a completely
+A server-side seasons mod for Minecraft **26.2 and 26.3**, on **Fabric, NeoForge and Forge**. Players join with a completely
 unmodified game: no client mod, resource pack or client networking is needed. Installing Seasonfall on a client is
 optional and only makes colour changes show up live instead of on rejoin.
 
@@ -68,6 +68,7 @@ put the same jar in players' `mods` folders for live updates.
 |---|---|---|
 | Fabric | `seasonfall-fabric-1.0.0+26.3.jar` | `seasonfall-fabric-1.0.0+26.2.jar` |
 | NeoForge | `seasonfall-neoforge-1.0.0+26.3.jar` | `seasonfall-neoforge-1.0.0+26.2.jar` |
+| Forge | `seasonfall-forge-1.0.0+26.3.jar` | `seasonfall-forge-1.0.0+26.2.jar` |
 
 The year is saved in `seasonfall.json` in the world folder and survives restarts.
 
@@ -200,15 +201,18 @@ gradlew build
 gradlew build -Pmc=26.2
 ```
 
-Jars end up in `Fabric/build/libs` and `NeoForge/build/libs`.
+Jars end up in `Fabric/build/libs`, `NeoForge/build/libs` and `Forge/build/libs`.
 `build` also runs the unit tests (calendar, season history, growth maths, config checks, saving).
 
 Testing helpers (add `-Pmc=26.2` for 26.2):
 
-- `gradlew :Fabric:runServer` or `:NeoForge:runServer`: a test server in `runs/server-<version>`; add `-Prun=<name>` for a fresh
-  folder `runs/<name>-<version>` so existing test worlds are left alone
+- `gradlew :Fabric:runServer`, `:NeoForge:runServer` or `:Forge:runServer`: a test server in `runs/server-<version>`; add
+  `-Prun=<name>` for a fresh folder `runs/<name>-<version>` so existing test worlds are left alone
 - `gradlew runVanillaClient`: the official, unmodified game from your launcher, joining `localhost:25565`
-- `gradlew :Fabric:runModdedClient` or `:NeoForge:runModdedClient`: a client with Seasonfall, joining `localhost:25565`
+- `gradlew :Fabric:runModdedClient`, `:NeoForge:runModdedClient` or `:Forge:runModdedClient`: a client with Seasonfall,
+  joining `localhost:25565`
+
+Both clients take `-Pserver=<host>:<port>` to join another server instead.
 
 Seasonfall contains no code from Serene Seasons or any other seasons mod.
 

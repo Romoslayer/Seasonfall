@@ -16,11 +16,12 @@ neoForge {
             gameDirectory = file("runs/${findProperty('run') ?: 'server'}-${mc_version}")
             programArgument '--nogui'
         }
-        // A second client with the mod that goes straight to a server on localhost: shows the live season updates
+        // A second client with the mod that goes straight to a server on localhost (-Pserver=host:port for another):
+        // shows the live season updates
         moddedClient {
             client()
             gameDirectory = file("runs/modded-client-${mc_version}")
-            programArguments.addAll('--quickPlayMultiplayer', 'localhost:25565', '--username', 'Modded')
+            programArguments.addAll('--quickPlayMultiplayer', findProperty('server') ?: 'localhost:25565', '--username', 'Modded')
             logLevel = org.slf4j.event.Level.DEBUG
         }
     }

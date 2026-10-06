@@ -1,0 +1,51 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.minecraftforge.gradle'
+}
+
+// ForgeGradle only fills in the launch settings of runs Forge defines itself (client, server, ...), so the second client
+// with the mod, which goes straight to a server on localhost (-Pserver=host:port for another) to show the live season
+// updates, is the client run started as runModdedClient
+def moddedClient = gradle.startParameter.taskNames.any { it == 'runModdedClient' || it.endsWith(':runModdedClient') }
+
+minecraft {
+    runs {
+        configureEach {
+            // Dev runs load the mod from folders, so Mixin cannot read the config from the jar manifest
+            args "--mixin.config=${mod_id}.mixins.json"
+        }
+        register('client') {
+            workingDir = layout.projectDirectory.dir("runs/${moddedClient ? 'modded-client' : 'client'}-${mc_version}")
+            if (moddedClient) {
+                args '--quickPlayMultiplayer', findProperty('server') ?: 'localhost:25565', '--username', 'Modded'
+            }
+        }
+        register('server') {
+            workingDir = layout.projectDirectory.dir("runs/${findProperty('run') ?: 'server'}-${mc_version}")
+            args '--nogui'
+        }
+    }
+}
+
+tasks.register('runModdedClient') {
+    group = 'Slime Launcher'
+    description = 'Runs a client with the mod that joins localhost:25565 (or -Pserver=host:port).'
+    dependsOn 'runClient'
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${forge_version}")
+}
+
+jar {
+    // Forge has no mods.toml entry for mixins: Mixin finds the config through the manifest
+    manifest {
+        attributes 'MixinConfigs': "${mod_id}.mixins.json"
+    }
+}
