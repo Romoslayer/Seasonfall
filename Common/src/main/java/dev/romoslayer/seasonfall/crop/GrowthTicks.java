@@ -13,7 +13,7 @@ public final class GrowthTicks {
 
 	/** The speed actually applied: never below 0 nor above {@link SeasonfallConfig#MAX_GROWTH}. */
 	public static float effective(float multiplier) {
-		return Float.isFinite(multiplier) ? Math.clamp(multiplier, 0.0F, SeasonfallConfig.MAX_GROWTH) : 1.0F;
+		return Float.isFinite(multiplier) ? Math.max(0.0F, Math.min(SeasonfallConfig.MAX_GROWTH, multiplier)) : 1.0F;
 	}
 
 	/** Whether the game's own random tick happens. {@code roll} is uniform in [0, 1). */

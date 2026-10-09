@@ -61,7 +61,7 @@ public final class SnowAndIce {
 		if (Climate.profile(biome) == null) {
 			return false;
 		}
-		float temperature = ((BiomeInvoker) (Object) biome.value()).seasonfall$temperature(pos, level.getSeaLevel());
+		float temperature = ((BiomeInvoker) (Object) biome.value()).seasonfall$temperature(pos);
 		return temperature >= SeasonfallConfig.get().freezing.thawTemperatureThreshold;
 	}
 

@@ -8,17 +8,16 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class SeasonfallFabric implements ModInitializer, Platform {
 	@Override
 	public void onInitialize() {
 		Seasonfall.init(this);
-		// Only games with Seasonfall announce this channel, so only they are ever sent it
-		PayloadTypeRegistry.clientboundPlay().register(BiomeSeasonPayload.TYPE, BiomeSeasonPayload.STREAM_CODEC);
 		ServerLifecycleEvents.SERVER_STARTED.register(Seasonfall::onServerStarted);
 		ServerLifecycleEvents.SERVER_STOPPING.register(Seasonfall::onServerStopping);
 		ServerTickEvents.END_SERVER_TICK.register(Seasonfall::onServerTickEnd);
@@ -36,13 +35,16 @@ public final class SeasonfallFabric implements ModInitializer, Platform {
 		return FabricLoader.getInstance().isModLoaded(modId);
 	}
 
+	/** Only games with Seasonfall announce the channel (by listening on it), so only they are ever sent it. */
 	@Override
 	public boolean canSendLiveUpdates(ServerPlayer player) {
-		return ServerPlayNetworking.canSend(player, BiomeSeasonPayload.TYPE);
+		return ServerPlayNetworking.canSend(player, BiomeSeasonPayload.ID);
 	}
 
 	@Override
 	public void sendLiveUpdate(ServerPlayer player, BiomeSeasonPayload payload) {
-		ServerPlayNetworking.send(player, payload);
+		FriendlyByteBuf buf = PacketByteBufs.create();
+		payload.write(buf);
+		ServerPlayNetworking.send(player, BiomeSeasonPayload.ID, buf);
 	}
 }

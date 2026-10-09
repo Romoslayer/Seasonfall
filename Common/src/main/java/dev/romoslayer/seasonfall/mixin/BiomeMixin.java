@@ -3,6 +3,7 @@ package dev.romoslayer.seasonfall.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.romoslayer.seasonfall.climate.BiomeProfile;
 import dev.romoslayer.seasonfall.climate.Climate;
 import dev.romoslayer.seasonfall.climate.ColorMaps;
@@ -10,7 +11,6 @@ import dev.romoslayer.seasonfall.climate.SeasonalBiome;
 import dev.romoslayer.seasonfall.config.SeasonfallConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.ARGB;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -32,8 +32,6 @@ public abstract class BiomeMixin implements SeasonalBiome {
 	@Unique
 	private volatile int seasonfall$clientFoliage = NO_COLOR;
 	@Unique
-	private volatile int seasonfall$clientDryFoliage = NO_COLOR;
-	@Unique
 	private volatile int seasonfall$clientBirch = NO_COLOR;
 	@Unique
 	private volatile int seasonfall$clientSpruce = NO_COLOR;
@@ -46,8 +44,8 @@ public abstract class BiomeMixin implements SeasonalBiome {
 	 * Every temperature check (snowfall, freezing, melting, rain or snow) goes through here. The game caches the value it
 	 * computes before this runs, so the cache never holds a temperature from earlier in the year.
 	 */
-	@ModifyReturnValue(method = "getTemperature(Lnet/minecraft/core/BlockPos;I)F", at = @At("RETURN"))
-	private float seasonfall$seasonalTemperature(float temperature, BlockPos pos, int seaLevel) {
+	@ModifyReturnValue(method = "getTemperature(Lnet/minecraft/core/BlockPos;)F", at = @At("RETURN"))
+	private float seasonfall$seasonalTemperature(float temperature, BlockPos pos) {
 		return Climate.adjust((Biome) (Object) this, temperature);
 	}
 
@@ -77,31 +75,26 @@ public abstract class BiomeMixin implements SeasonalBiome {
 		return !(level instanceof ServerLevel serverLevel) || Climate.hasSeasons(serverLevel);
 	}
 
-	// Colours from a live update replace the biome's own, before the swamp and dark forest grass effects apply as usual
-
-	@ModifyReturnValue(method = "getBaseGrassColor", at = @At("RETURN"))
-	private int seasonfall$grass(int color) {
-		return this.seasonfall$clientGrass == NO_COLOR ? color : ARGB.opaque(this.seasonfall$clientGrass);
-	}
-
-	/** Swamp grass ignores the colour above, so its two colours are moved by the season's change from their average. */
-	@ModifyReturnValue(method = "getGrassColor", at = @At("RETURN"))
-	private int seasonfall$swampGrass(int color) {
-		if (this.seasonfall$clientGrass == NO_COLOR
-				|| ((Biome) (Object) this).getSpecialEffects().grassColorModifier() != BiomeSpecialEffects.GrassColorModifier.SWAMP) {
-			return color;
+	/**
+	 * Grass from a live update replaces the biome's own colour, before the swamp and dark forest grass effects apply as
+	 * usual. Swamp grass ignores the colour it is given, so its two colours are moved by the season's change from their
+	 * average instead.
+	 */
+	@WrapOperation(method = "getGrassColor",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/biome/BiomeSpecialEffects$GrassColorModifier;modifyColor(DDI)I"))
+	private int seasonfall$grass(BiomeSpecialEffects.GrassColorModifier modifier, double x, double z, int color, Operation<Integer> original) {
+		int grass = this.seasonfall$clientGrass;
+		if (grass == NO_COLOR) {
+			return original.call(modifier, x, z, color);
 		}
-		return ARGB.opaque(ColorMaps.shift(color, ColorMaps.SWAMP_GRASS, this.seasonfall$clientGrass));
+		int modified = original.call(modifier, x, z, ColorMaps.opaque(grass));
+		return modifier == BiomeSpecialEffects.GrassColorModifier.SWAMP ? ColorMaps.opaque(ColorMaps.shift(modified, ColorMaps.SWAMP_GRASS, grass))
+				: modified;
 	}
 
 	@ModifyReturnValue(method = "getFoliageColor", at = @At("RETURN"))
 	private int seasonfall$foliage(int color) {
-		return this.seasonfall$clientFoliage == NO_COLOR ? color : ARGB.opaque(this.seasonfall$clientFoliage);
-	}
-
-	@ModifyReturnValue(method = "getDryFoliageColor", at = @At("RETURN"))
-	private int seasonfall$dryFoliage(int color) {
-		return this.seasonfall$clientDryFoliage == NO_COLOR ? color : ARGB.opaque(this.seasonfall$clientDryFoliage);
+		return this.seasonfall$clientFoliage == NO_COLOR ? color : ColorMaps.opaque(this.seasonfall$clientFoliage);
 	}
 
 	@Override
@@ -136,11 +129,6 @@ public abstract class BiomeMixin implements SeasonalBiome {
 	}
 
 	@Override
-	public int seasonfall$clientDryFoliage() {
-		return this.seasonfall$clientDryFoliage;
-	}
-
-	@Override
 	public int seasonfall$clientBirch() {
 		return this.seasonfall$clientBirch;
 	}
@@ -161,8 +149,7 @@ public abstract class BiomeMixin implements SeasonalBiome {
 	}
 
 	@Override
-	public void seasonfall$setClientSeason(float temperatureChange, int grass, int foliage, int dryFoliage, int birch, int spruce, int leafOverlay,
-			int blossomOverlay) {
+	public void seasonfall$setClientSeason(float temperatureChange, int grass, int foliage, int birch, int spruce, int leafOverlay, int blossomOverlay) {
 		this.seasonfall$clientBlossomOverlay = blossomOverlay;
 		this.seasonfall$clientLeafOverlay = leafOverlay;
 		this.seasonfall$clientBirch = birch;
@@ -170,6 +157,5 @@ public abstract class BiomeMixin implements SeasonalBiome {
 		this.seasonfall$clientTemperatureChange = temperatureChange;
 		this.seasonfall$clientGrass = grass;
 		this.seasonfall$clientFoliage = foliage;
-		this.seasonfall$clientDryFoliage = dryFoliage;
 	}
 }

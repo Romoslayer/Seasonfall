@@ -55,7 +55,7 @@ public final class SeasonValues {
 			return fallback;
 		}
 		if (value < min || value > max) {
-			float clamped = Math.clamp(value, min, max);
+			float clamped = Math.max(min, Math.min(max, value));
 			problems.add(path + " must be between " + min + " and " + max + "; using " + clamped);
 			return clamped;
 		}

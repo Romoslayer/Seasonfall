@@ -10,7 +10,6 @@ public final class ColorMaps {
 	// A = hot and wet, B = hot and dry, C = cold, then the midpoints of A-B, B-C and A-C
 	private static final int[] GRASS = {0x47CD33, 0xBFB755, 0x80B497, 0x82C245, 0xA0B676, 0x7CBD6B};
 	private static final int[] FOLIAGE = {0x1ABF00, 0xAEA42A, 0x60A17B, 0x64B216, 0x87A353, 0x5BAB46};
-	private static final int[] DRY_FOLIAGE = {0xA35F46, 0xA38046, 0x8F7A5A, 0xA37146, 0x9E784B, 0xA37146};
 
 	/**
 	 * Swamp grass ignores the biome's grass colour: the game picks one of two fixed colours from noise. Seasonal swamp
@@ -23,10 +22,19 @@ public final class ColorMaps {
 
 	/** {@code color} moved by the difference between {@code to} and {@code from}, each channel kept within 0 to 255. */
 	public static int shift(int color, int from, int to) {
-		int r = Math.clamp((color >> 16 & 255) + (to >> 16 & 255) - (from >> 16 & 255), 0, 255);
-		int g = Math.clamp((color >> 8 & 255) + (to >> 8 & 255) - (from >> 8 & 255), 0, 255);
-		int b = Math.clamp((color & 255) + (to & 255) - (from & 255), 0, 255);
+		int r = channel((color >> 16 & 255) + (to >> 16 & 255) - (from >> 16 & 255));
+		int g = channel((color >> 8 & 255) + (to >> 8 & 255) - (from >> 8 & 255));
+		int b = channel((color & 255) + (to & 255) - (from & 255));
 		return r << 16 | g << 8 | b;
+	}
+
+	private static int channel(int value) {
+		return Math.max(0, Math.min(255, value));
+	}
+
+	/** An 0xRRGGBB colour as the fully opaque 0xAARRGGBB the game's colour methods return. */
+	public static int opaque(int rgb) {
+		return 0xFF000000 | rgb;
 	}
 
 	public static int grass(float temperature, float downfall) {
@@ -35,10 +43,6 @@ public final class ColorMaps {
 
 	public static int foliage(float temperature, float downfall) {
 		return sample(FOLIAGE, temperature, downfall);
-	}
-
-	public static int dryFoliage(float temperature, float downfall) {
-		return sample(DRY_FOLIAGE, temperature, downfall);
 	}
 
 	/** {@code from} moved {@code amount} (0 to 1) of the way to {@code to}, as 0xRRGGBB. */

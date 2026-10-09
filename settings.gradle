@@ -24,10 +24,9 @@ plugins {
 rootProject.name = 'seasonfall'
 include('Common', 'Fabric', 'NeoForge', 'Forge')
 
-// One source tree builds every supported game version. The default is 26.3; build 26.2 with
-//   gradlew build -Pmc=26.2
-// Everything that differs between versions lives in versions/<mc>.properties.
-def mc = providers.gradleProperty('mc').getOrElse('26.3')
+// This branch builds Minecraft 1.20.1 (26.x is on main, 1.21.1 on mc1.21.1). Everything version-specific lives in
+// versions/<mc>.properties.
+def mc = providers.gradleProperty('mc').getOrElse('1.20.1')
 def versionFile = file("versions/${mc}.properties")
 if (!versionFile.isFile()) {
     throw new GradleException("Unsupported Minecraft version '${mc}': ${versionFile} does not exist")

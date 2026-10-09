@@ -1,8 +1,10 @@
 # Seasonfall
 
-A server-side seasons mod for Minecraft **26.2 and 26.3**, on **Fabric, NeoForge and Forge**. Players join with a completely
+A server-side seasons mod for Minecraft **1.20.1**, on **Fabric, NeoForge and Forge**. Players join with a completely
 unmodified game: no client mod, resource pack or client networking is needed. Installing Seasonfall on a client is
 optional and only makes colour changes show up live instead of on rejoin.
+
+This is the `mc1.20.1` branch. Minecraft 26.2 and 26.3 are on `main`, 1.21.1 on `mc1.21.1`.
 
 The year is one continuous cycle (0 = start of spring, 0.25 summer, 0.5 autumn, 0.75 winter). Nothing flips over when a
 season starts; temperatures, colours, crop growth and day length all move smoothly through the year, and every biome
@@ -37,18 +39,17 @@ There are no new items, blocks, screens or player-facing messages; players notic
 
 What changes colour:
 
-- **Grass colour:** grass blocks (top and sides), short and tall grass, ferns, bushes, sugar cane, and the stems of pink
-  petals and wildflowers. Grass goes bright in spring, deep green in summer, olive to tawny in autumn and a dormant
-  grey in winter. Swamp grass takes its two colours from the game itself, so it only follows the seasons for
-  players with Seasonfall installed.
+- **Grass colour:** grass blocks (top and sides), short and tall grass, ferns, sugar cane, and the stems of pink petals.
+  Grass goes bright in spring, deep green in summer, olive to tawny in autumn and a dormant grey in winter. Swamp grass
+  takes its two colours from the game itself, so it only follows the seasons for players with Seasonfall installed.
 - **Leaf colour:** oak, dark oak, jungle, acacia and mangrove leaves, and vines.
-- **Birch, spruce, cherry, azalea, flowering azalea and pale oak leaves:** only for players with Seasonfall installed. An
+- **Birch, spruce, cherry, azalea and flowering azalea leaves:** only for players with Seasonfall installed. An
   unmodified game gives birch and spruce one fixed colour and takes the others' colour straight from their textures,
   which the server cannot change. With the mod, birch follows the biome's palette, spruce only shifts slightly (it keeps
-  its needles), and azalea and pale oak keep their own colours in spring and summer, then take on the biome's autumn and
-  winter colours. Cherry and flowering azalea have their flowers in the same texture, so they only warm towards gold in
-  autumn (cherry goes peach, the azalea flowers stay pink) and fade a little in winter.
-- **Unchanged:** leaf litter, lily pads and stems.
+  its needles), and azalea keeps its own colour in spring and summer, then takes on the biome's autumn and winter
+  colours. Cherry and flowering azalea have their flowers in the same texture, so they only warm towards gold in autumn
+  (cherry goes peach, the azalea flowers stay pink) and fade a little in winter.
+- **Unchanged:** lily pads and stems.
 
 Biome colours are per biome, not per dimension: if a dimension without seasons uses a biome that also appears in one
 with seasons (plains, say), players see that biome's seasonal colours there too. Snow, ice and crops in that dimension
@@ -56,19 +57,20 @@ are not affected.
 
 Modded biomes get seasons like vanilla ones, as long as a dimension with seasons generates them (biome mods add theirs to
 the overworld). A biome that no seasonal dimension generates, for example one only placed with `/fillbiome`, keeps its
-normal look. Large biome lists are fine: tested with about 1,470 biomes on Fabric and NeoForge, with and without the mod
-on the player's side.
+normal look.
 
 ## Installing
 
-Put the jar for your loader and game version in the server's `mods` folder (Fabric also needs Fabric API). Optionally
-put the same jar in players' `mods` folders for live updates.
+Put the jar for your loader in the server's `mods` folder (Fabric also needs Fabric API). Optionally put the same jar in
+players' `mods` folders for live updates.
 
-| Loader | 26.3 | 26.2 |
-|---|---|---|
-| Fabric | `seasonfall-fabric-1.0.0+26.3.jar` | `seasonfall-fabric-1.0.0+26.2.jar` |
-| NeoForge | `seasonfall-neoforge-1.0.0+26.3.jar` | `seasonfall-neoforge-1.0.0+26.2.jar` |
-| Forge | `seasonfall-forge-1.0.0+26.3.jar` | `seasonfall-forge-1.0.0+26.2.jar` |
+| Loader | 1.20.1 |
+|---|---|
+| Fabric (Fabric API 0.92+) | `seasonfall-fabric-1.0.0+1.20.1.jar` |
+| NeoForge 47.1 | `seasonfall-neoforge-1.0.0+1.20.1.jar` |
+| Forge 47 | `seasonfall-forge-1.0.0+1.20.1.jar` |
+
+On 1.20.1 NeoForge is still a fork of Forge, so its jar is built from the same code as the Forge one.
 
 The year is saved in `seasonfall.json` in the world folder and survives restarts.
 
@@ -95,8 +97,9 @@ left out of a crop override grows at normal speed; one left out of a built-in gr
 
 ### How biomes are classified
 
-Every biome gets a style worked out from its own temperature, downfall, precipitation and tags (including the shared
-`c:` tags most modded biomes use), so modded biomes get sensible seasons automatically:
+Every biome gets a style worked out from its own temperature, downfall, precipitation and tags (including the loaders'
+shared tags most modded biomes use: `c:` on Fabric, `forge:` on Forge and NeoForge), so modded biomes get sensible
+seasons automatically:
 
 `frozen`, `ocean`, `tropical`, `savanna`, `arid`, `evergreen`, `wetland`, `deciduous`, `temperate`
 
@@ -165,21 +168,17 @@ recorded is assumed to have passed at the normal pace.
 
 ### Elapsed
 
-[Elapsed](../Elapsed) (offline progression) finds Seasonfall on its own, with no extra setup on either side. A crop left
-unloaded grows by the seasons the year went through while it was unloaded, pauses included (also the time the year
-waited with nobody online): a field left alone through
-winter comes back with about a third of the growth of one left alone through summer. If Elapsed is set to count real
-time while the server was off, that time is treated as game time before the absence (the year does not move while the
-server is off), which is an approximation. Elapsed's `[seasonfall] integrationEnabled` option turns the link off.
+[Elapsed](../Elapsed) (offline progression) uses `averageCropGrowthMultiplier` on Minecraft 26.x. It has no 1.20.1 build
+yet; the API is the same here for it or any other mod that catches plants up.
 
 ## Things to know
 
-- The year only moves while someone is online (`general.pauseWhenEmpty`, on by default). Most servers stop ticking
-  anyway once empty (`pause-when-empty-seconds` in `server.properties`); this also holds the year on servers that keep
-  running. Turn it off to let the seasons pass on an empty server that keeps running.
+- The year only moves while someone is online (`general.pauseWhenEmpty`, on by default). A 1.20.1 server keeps
+  ticking with nobody on, so without this the seasons would pass on an empty server. Turn it off to let them.
 
-- Seasonal day length takes over the overworld clock's speed (`/time rate`). Turn off `dayLength.seasonalDayLength` if
-  you use `/time rate` yourself.
+- Seasonal day length moves the overworld's time of day on faster or slower than a tick per tick. Players without the
+  mod see the sun and moon catch up each time the server sends them the time (once a second), a step of a few ticks at
+  the default settings. Turn off `dayLength.seasonalDayLength` if another mod also changes how fast the day passes.
 - Exposed snow layers and ice in seasonal biomes melt when it is warm, including player-placed ones. Use packed or blue
   ice, or put a roof over them.
 - New chunks generate with each biome's normal climate; seasonal snow and ice only come from weather afterwards.
@@ -191,20 +190,16 @@ server is off), which is an approximation. Elapsed's `[seasonfall] integrationEn
 
 ## Building
 
-Java 25. One source tree builds every version:
+Gradle runs on Java 25 and builds with a Java 17 toolchain (downloaded if it is not installed):
 
 ```bash
 gradlew build
 ```
 
-```bash
-gradlew build -Pmc=26.2
-```
+Jars end up in `Fabric/build/libs`, `NeoForge/build/libs` and `Forge/build/libs`. `build` also runs the unit tests
+(calendar, season history, growth maths, config checks, saving).
 
-Jars end up in `Fabric/build/libs`, `NeoForge/build/libs` and `Forge/build/libs`.
-`build` also runs the unit tests (calendar, season history, growth maths, config checks, saving).
-
-Testing helpers (add `-Pmc=26.2` for 26.2):
+Testing helpers:
 
 - `gradlew :Fabric:runServer`, `:NeoForge:runServer` or `:Forge:runServer`: a test server in `runs/server-<version>`; add
   `-Prun=<name>` for a fresh folder `runs/<name>-<version>` so existing test worlds are left alone
@@ -218,4 +213,5 @@ Seasonfall contains no code from Serene Seasons or any other seasons mod.
 
 ## Licence
 
-MIT. See `LICENSE`.
+[PolyForm Shield 1.0.0](https://polyformproject.org/licenses/shield/1.0.0): you may use, change and share Seasonfall for
+any purpose except making something that competes with it. See `LICENSE` for the exact terms.

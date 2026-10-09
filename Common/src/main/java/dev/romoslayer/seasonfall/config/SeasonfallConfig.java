@@ -74,9 +74,8 @@ public final class SeasonfallConfig {
 		@Comment("Whether the year moves on with the overworld's time of day. When false, the season stays where it is.")
 		public boolean seasonCycleEnabled = true;
 		@Comment("""
-				Hold the year while nobody is online, so the seasons only pass while people are playing. A server normally stops
-				ticking anyway once it has been empty for pause-when-empty-seconds (server.properties, 60 by default); this also
-				covers servers set to keep running with nobody on.""")
+				Hold the year while nobody is online, so the seasons only pass while people are playing. The server itself keeps
+				running with nobody on.""")
 		public boolean pauseWhenEmpty = true;
 		@Comment("The season a new world starts in.")
 		public String startingSeason = Season.SPRING.id();
@@ -173,8 +172,8 @@ public final class SeasonfallConfig {
 
 	public static final class DayLength {
 		@Comment("""
-				Longer days in summer and longer nights in winter, by running the overworld clock slower or faster. A day and night
-				together still take the usual time. This takes over the overworld clock's rate (/time rate).""")
+				Longer days in summer and longer nights in winter, by running the overworld's time of day slower or faster. A day
+				and night together still take the usual time.""")
 		public boolean seasonalDayLength = true;
 		@Comment("How long daytime lasts in midsummer and midwinter compared to normal. Spring and autumn are about even.")
 		public float summerDayLengthMultiplier = 1.25F;
@@ -231,7 +230,7 @@ public final class SeasonfallConfig {
 		}
 
 		private static float orOne(@Nullable Float value) {
-			return value == null || !Float.isFinite(value) ? 1.0F : Math.clamp(value, 0.0F, MAX_GROWTH);
+			return value == null || !Float.isFinite(value) ? 1.0F : Math.max(0.0F, Math.min(MAX_GROWTH, value));
 		}
 	}
 
@@ -393,7 +392,7 @@ public final class SeasonfallConfig {
 
 	private static int range(int value, int min, int max, String path, Problems problems) {
 		if (value < min || value > max) {
-			int clamped = Math.clamp(value, min, max);
+			int clamped = Math.max(min, Math.min(max, value));
 			problems.add(path + " must be between " + min + " and " + max + "; using " + clamped);
 			return clamped;
 		}
@@ -406,7 +405,7 @@ public final class SeasonfallConfig {
 			return fallback;
 		}
 		if (value < min || value > max) {
-			float clamped = Math.clamp(value, min, max);
+			float clamped = Math.max(min, Math.min(max, value));
 			problems.add(path + " must be between " + min + " and " + max + "; using " + clamped);
 			return clamped;
 		}
@@ -574,6 +573,6 @@ public final class SeasonfallConfig {
 	}
 
 	static float clamp01(float value) {
-		return Float.isFinite(value) ? Math.clamp(value, 0.0F, 1.0F) : 0.0F;
+		return Float.isFinite(value) ? Math.max(0.0F, Math.min(1.0F, value)) : 0.0F;
 	}
 }

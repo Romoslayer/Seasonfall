@@ -9,6 +9,10 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 public final class SeasonfallFabricClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-		ClientPlayNetworking.registerGlobalReceiver(BiomeSeasonPayload.TYPE, (payload, context) -> ClientSeasons.apply(payload));
+		// Read on the network thread, applied on the game thread
+		ClientPlayNetworking.registerGlobalReceiver(BiomeSeasonPayload.ID, (client, handler, buf, sender) -> {
+			BiomeSeasonPayload payload = BiomeSeasonPayload.read(buf);
+			client.execute(() -> ClientSeasons.apply(payload));
+		});
 	}
 }

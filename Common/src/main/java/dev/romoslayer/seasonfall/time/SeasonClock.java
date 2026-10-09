@@ -64,7 +64,7 @@ public final class SeasonClock {
 
 	public void stop() {
 		this.save();
-		this.dayLength.reset(this.server);
+		this.dayLength.reset();
 		Climate.stop(this.server);
 	}
 
@@ -108,7 +108,7 @@ public final class SeasonClock {
 
 	private long overworldClockTime() {
 		ServerLevel overworld = this.server.getLevel(Level.OVERWORLD);
-		return overworld == null ? 0 : overworld.getOverworldClockTime();
+		return overworld == null ? 0 : overworld.getDayTime();
 	}
 
 	private void checkForNewSeason() {
@@ -190,6 +190,11 @@ public final class SeasonClock {
 
 	public long seasonTicks() {
 		return this.state.seasonTicks;
+	}
+
+	/** The seasonal speed of the overworld's time of day. */
+	public DayLength dayLength() {
+		return this.dayLength;
 	}
 
 	/** How far through the year it is (0 to 1), as of this tick. */

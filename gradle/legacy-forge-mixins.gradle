@@ -1,0 +1,29 @@
+// Mixin setup shared by the Forge and NeoForge 47 builds (applied from their build.gradle)
+
+// Forge 1.20.1 runs on SRG names, so the mixins need a refmap
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "${mod_id}.mixins.json"
+}
+
+dependencies {
+    annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
+    compileOnly "io.github.llamalad7:mixinextras-common:${mixinextras_version}"
+    annotationProcessor "io.github.llamalad7:mixinextras-common:${mixinextras_version}"
+    // Forge 47 does not ship MixinExtras (Fabric Loader does), so the jar carries it
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:${mixinextras_version}"))
+}
+
+processResources {
+    // Point the config at the refmap the annotation processor writes (the Fabric jar has no refmap)
+    filesMatching("${mod_id}.mixins.json") {
+        filter { it.replace('"package":', "\"refmap\": \"${mod_id}.refmap.json\",\n  \"package\":") }
+    }
+}
+
+jar {
+    // Forge has no mods.toml entry for mixins: Mixin finds the config through the manifest
+    manifest {
+        attributes 'MixinConfigs': "${mod_id}.mixins.json"
+    }
+}

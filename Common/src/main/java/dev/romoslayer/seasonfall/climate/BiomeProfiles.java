@@ -7,11 +7,12 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import org.jspecify.annotations.Nullable;
@@ -25,15 +26,16 @@ public final class BiomeProfiles {
 	/** Rain turns to snow, and still water freezes, below this temperature. */
 	public static final float FREEZING = 0.15F;
 
-	// Shared "c" tags that Fabric and NeoForge both fill in, which modded biomes usually join
-	private static final TagKey<Biome> SNOWY = common("is_snowy");
-	private static final TagKey<Biome> ICY = common("is_icy");
-	private static final TagKey<Biome> DESERT = common("is_desert");
-	private static final TagKey<Biome> SWAMP = common("is_swamp");
-	private static final TagKey<Biome> CONIFEROUS = common("is_coniferous_tree");
-	private static final TagKey<Biome> DECIDUOUS = common("is_deciduous_tree");
-	private static final TagKey<Biome> JUNGLE_TREES = common("is_jungle_tree");
-	private static final TagKey<Biome> SAVANNA_TREES = common("is_savanna_tree");
+	// The loaders' shared biome tags, which modded biomes usually join. On 1.20.1 Fabric fills in "c" tags and Forge (and
+	// NeoForge 47) its own "forge" ones, under different names, so a biome counts if it is in either.
+	private static final List<TagKey<Biome>> SNOWY = List.of(tag("c", "snowy"), tag("forge", "is_snowy"));
+	private static final List<TagKey<Biome>> ICY = List.of(tag("c", "icy"));
+	private static final List<TagKey<Biome>> DESERT = List.of(tag("c", "desert"), tag("forge", "is_desert"));
+	private static final List<TagKey<Biome>> SWAMP = List.of(tag("c", "swamp"), tag("forge", "is_swamp"));
+	private static final List<TagKey<Biome>> CONIFEROUS = List.of(tag("c", "tree_coniferous"), tag("forge", "is_coniferous"));
+	private static final List<TagKey<Biome>> DECIDUOUS = List.of(tag("c", "tree_deciduous"));
+	private static final List<TagKey<Biome>> JUNGLE_TREES = List.of(tag("c", "tree_jungle"));
+	private static final List<TagKey<Biome>> SAVANNA_TREES = List.of(tag("c", "tree_savanna"));
 
 	private BiomeProfiles() {
 	}
@@ -46,7 +48,7 @@ public final class BiomeProfiles {
 		BiomeStyle style = derive(holder, temperature, downfall, precipitation);
 
 		SeasonfallConfig.BiomeOverride override = holder.unwrapKey()
-				.map(key -> SeasonfallConfig.get().biomeOverrides.get(key.identifier().toString()))
+				.map(key -> SeasonfallConfig.get().biomeOverrides.get(key.location().toString()))
 				.orElse(null);
 		if (override == null) {
 			return new BiomeProfile(style, temperature, downfall, precipitation, style.temperatureSeasonality(), style.foliageChange(),
@@ -69,28 +71,28 @@ public final class BiomeProfiles {
 	}
 
 	private static BiomeStyle derive(Holder<Biome> biome, float temperature, float downfall, boolean precipitation) {
-		if (temperature < FREEZING || biome.is(SNOWY) || biome.is(ICY)) {
+		if (temperature < FREEZING || in(biome, SNOWY) || in(biome, ICY)) {
 			return BiomeStyle.FROZEN;
 		}
 		if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_DEEP_OCEAN)) {
 			return BiomeStyle.OCEAN;
 		}
-		if (biome.is(BiomeTags.IS_JUNGLE) || biome.is(JUNGLE_TREES) || (temperature >= 0.95F && downfall >= 0.8F)) {
+		if (biome.is(BiomeTags.IS_JUNGLE) || in(biome, JUNGLE_TREES) || (temperature >= 0.95F && downfall >= 0.8F)) {
 			return BiomeStyle.TROPICAL;
 		}
-		if (biome.is(BiomeTags.IS_SAVANNA) || biome.is(SAVANNA_TREES) || (precipitation && temperature >= 1.0F)) {
+		if (biome.is(BiomeTags.IS_SAVANNA) || in(biome, SAVANNA_TREES) || (precipitation && temperature >= 1.0F)) {
 			return BiomeStyle.SAVANNA;
 		}
-		if (biome.is(BiomeTags.IS_BADLANDS) || biome.is(DESERT) || (!precipitation && temperature >= 1.0F)) {
+		if (biome.is(BiomeTags.IS_BADLANDS) || in(biome, DESERT) || (!precipitation && temperature >= 1.0F)) {
 			return BiomeStyle.ARID;
 		}
-		if (biome.is(BiomeTags.IS_TAIGA) || biome.is(CONIFEROUS)) {
+		if (biome.is(BiomeTags.IS_TAIGA) || in(biome, CONIFEROUS)) {
 			return BiomeStyle.EVERGREEN;
 		}
-		if (biome.is(SWAMP) || (downfall >= 0.85F && temperature >= 0.6F)) {
+		if (in(biome, SWAMP) || (downfall >= 0.85F && temperature >= 0.6F)) {
 			return BiomeStyle.WETLAND;
 		}
-		if (biome.is(BiomeTags.IS_FOREST) || biome.is(DECIDUOUS)) {
+		if (biome.is(BiomeTags.IS_FOREST) || in(biome, DECIDUOUS)) {
 			return BiomeStyle.DECIDUOUS;
 		}
 		if (temperature < 0.35F) {
@@ -116,8 +118,9 @@ public final class BiomeProfiles {
 
 	private static float readDownfall(Biome biome, DynamicOps<Tag> ops) {
 		try {
-			Tag encoded = Biome.NETWORK_CODEC.encodeStart(ops, biome).getOrThrow();
-			return encoded instanceof CompoundTag tag ? tag.getFloatOr("downfall", 0.5F) : 0.5F;
+			Tag encoded = Biome.NETWORK_CODEC.encodeStart(ops, biome).getOrThrow(false, error -> {
+			});
+			return encoded instanceof CompoundTag tag && tag.contains("downfall", Tag.TAG_ANY_NUMERIC) ? tag.getFloat("downfall") : 0.5F;
 		} catch (RuntimeException e) {
 			Seasonfall.LOGGER.warn("Could not read a biome's downfall, assuming 0.5: {}", e.getMessage());
 			return 0.5F;
@@ -128,7 +131,16 @@ public final class BiomeProfiles {
 		return value == null || !Float.isFinite(value) ? fallback : Math.max(0.0F, value);
 	}
 
-	private static TagKey<Biome> common(String path) {
-		return TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("c", path));
+	private static boolean in(Holder<Biome> biome, List<TagKey<Biome>> tags) {
+		for (TagKey<Biome> tag : tags) {
+			if (biome.is(tag)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static TagKey<Biome> tag(String namespace, String path) {
+		return TagKey.create(Registries.BIOME, new ResourceLocation(namespace, path));
 	}
 }

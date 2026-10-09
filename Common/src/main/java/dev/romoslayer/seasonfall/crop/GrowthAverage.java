@@ -25,7 +25,7 @@ public final class GrowthAverage {
 		if (elapsedTicks <= 0) {
 			return speedAt.applyAsDouble(endGameTime);
 		}
-		int samples = (int) Math.clamp((long) Math.ceil(elapsedTicks * (double) SAMPLES_PER_YEAR / Math.max(1, yearTicks)), MIN_SAMPLES, MAX_SAMPLES);
+		int samples = (int) Math.max(MIN_SAMPLES, Math.min(MAX_SAMPLES, (long) Math.ceil(elapsedTicks * (double) SAMPLES_PER_YEAR / Math.max(1, yearTicks))));
 		double sum = 0.0;
 		for (int i = 0; i < samples; i++) {
 			long gameTime = endGameTime - elapsedTicks + (long) ((i + 0.5) * elapsedTicks / samples);

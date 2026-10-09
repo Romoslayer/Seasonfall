@@ -1,10 +1,20 @@
 plugins {
     id 'multiloader-loader'
-    id 'net.neoforged.moddev'
+    id 'net.neoforged.moddev.legacyforge'
 }
 
-neoForge {
-    version = neoforge_version
+// NeoForge 47.1 is still a Forge fork on 1.20.1 (same packages, same mods.toml), so this builds the Forge project's
+// entrypoint and metadata against NeoForge instead of Forge
+def forge = project(':Forge')
+sourceSets.main {
+    java.srcDir forge.file('src/main/java')
+    resources.srcDir forge.file('src/main/resources')
+}
+
+legacyForge {
+    enable {
+        neoForgeVersion = neoforge_version
+    }
 
     runs {
         client {
@@ -22,7 +32,6 @@ neoForge {
             client()
             gameDirectory = file("runs/modded-client-${mc_version}")
             programArguments.addAll('--quickPlayMultiplayer', findProperty('server') ?: 'localhost:25565', '--username', 'Modded')
-            logLevel = org.slf4j.event.Level.DEBUG
         }
     }
 
@@ -32,3 +41,5 @@ neoForge {
         }
     }
 }
+
+apply from: rootProject.file('gradle/legacy-forge-mixins.gradle')

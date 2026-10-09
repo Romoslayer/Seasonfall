@@ -43,7 +43,7 @@ final class CommentedJson {
 	}
 
 	private void object(JsonObject object, @Nullable Object source, int depth) {
-		if (object.isEmpty()) {
+		if (object.size() == 0) {
 			this.out.append("{}");
 			return;
 		}

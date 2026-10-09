@@ -55,9 +55,9 @@ public final class SeasonHistory {
 			all.add(point.clone());
 		}
 		if (!this.line.isEmpty()) {
-			all.add(this.line.getLast().clone());
+			all.add(last(this.line).clone());
 		}
-		if (this.live != null && (all.isEmpty() || !same(all.getLast(), this.live))) {
+		if (this.live != null && (all.isEmpty() || !same(last(all), this.live))) {
 			all.add(this.live.clone());
 		}
 		return all;
@@ -78,7 +78,7 @@ public final class SeasonHistory {
 			this.points.add(this.live.clone());
 			return;
 		}
-		long[] lastSample = this.line.isEmpty() ? this.points.getLast() : this.line.getLast();
+		long[] lastSample = this.line.isEmpty() ? last(this.points) : last(this.line);
 		if (gameTime - lastSample[0] >= SPACING) {
 			this.sample(this.live.clone());
 		}
@@ -107,11 +107,11 @@ public final class SeasonHistory {
 		if (all.isEmpty()) {
 			return gameTime;
 		}
-		long[] first = all.getFirst();
+		long[] first = all.get(0);
 		if (gameTime <= first[0]) {
 			return first[1] - (first[0] - gameTime);
 		}
-		long[] last = all.getLast();
+		long[] last = last(all);
 		if (gameTime >= last[0]) {
 			return last[1];
 		}
@@ -134,7 +134,7 @@ public final class SeasonHistory {
 	}
 
 	private void sample(long[] sample) {
-		long[] start = this.points.getLast();
+		long[] start = last(this.points);
 		boolean fits = this.line.size() < MAX_LINE_SAMPLES && Math.abs(sample[1] - start[1]) <= Long.MAX_VALUE / 4;
 		if (fits) {
 			for (long[] earlier : this.line) {
@@ -153,13 +153,13 @@ public final class SeasonHistory {
 
 	private void closeLine() {
 		if (!this.line.isEmpty()) {
-			this.close(this.line.getLast());
+			this.close(last(this.line));
 			this.line.clear();
 		}
 	}
 
 	private void close(long[] point) {
-		if (!this.points.isEmpty() && same(this.points.getLast(), point)) {
+		if (!this.points.isEmpty() && same(last(this.points), point)) {
 			return;
 		}
 		this.points.add(point.clone());
@@ -172,11 +172,15 @@ public final class SeasonHistory {
 		if (this.live != null) {
 			return this.live;
 		}
-		return this.points.isEmpty() ? null : this.points.getLast();
+		return this.points.isEmpty() ? null : last(this.points);
 	}
 
 	private static boolean same(long[] a, long[] b) {
 		return a[0] == b[0] && a[1] == b[1];
+	}
+
+	private static long[] last(List<long[]> points) {
+		return points.get(points.size() - 1);
 	}
 
 	private static long interpolate(long[] from, long[] to, long gameTime) {

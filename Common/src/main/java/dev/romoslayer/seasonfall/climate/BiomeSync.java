@@ -1,5 +1,8 @@
 package dev.romoslayer.seasonfall.climate;
 
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import dev.romoslayer.seasonfall.Seasonfall;
 import dev.romoslayer.seasonfall.config.Palette;
@@ -10,18 +13,13 @@ import dev.romoslayer.seasonfall.time.SeasonClock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.RegistrySynchronization;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ARGB;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -39,11 +37,10 @@ public final class BiomeSync {
 	private static final String EFFECTS = "effects";
 	private static final String GRASS = "grass_color";
 	private static final String FOLIAGE = "foliage_color";
-	private static final String DRY_FOLIAGE = "dry_foliage_color";
 
 	/**
-	 * How much of the season shows on leaves whose colour is in their texture (azalea, pale oak): none in spring and
-	 * summer, then the biome's autumn and winter colours laid over the texture.
+	 * How much of the season shows on leaves whose colour is in their texture (azalea): none in spring and summer, then
+	 * the biome's autumn and winter colours laid over the texture.
 	 */
 	private static final SeasonValues TEXTURED_LEAVES = new SeasonValues(0.0F, 0.0F, 1.0F, 0.8F);
 	/**
@@ -63,7 +60,7 @@ public final class BiomeSync {
 	 * Birch and spruce leaves only change for players with Seasonfall installed: an unmodified game colours them the same
 	 * everywhere, whatever it is sent.
 	 */
-	public record Look(float temperature, int grass, int foliage, int dryFoliage, int birch, int spruce, int leafOverlay, int blossomOverlay) {
+	public record Look(float temperature, int grass, int foliage, int birch, int spruce, int leafOverlay, int blossomOverlay) {
 	}
 
 	/**
@@ -86,7 +83,7 @@ public final class BiomeSync {
 			grass = tint(grass, palette.grassColors(), palette.grassStrengths(), colorPhase, profile.grassChange());
 			// The dark forest effect averages the grass colour with a fixed dark green, which halves the season. Sending
 			// half as much again shows three quarters of it; the full change on that dark base turned muddy brown.
-			if (biome.getSpecialEffects().grassColorModifier() == BiomeSpecialEffects.GrassColorModifier.DARK_FOREST) {
+			if (biome.getSpecialEffects().getGrassColorModifier() == BiomeSpecialEffects.GrassColorModifier.DARK_FOREST) {
 				grass = ColorMaps.blend(grass, ColorMaps.shift(grass, normal.grass(), grass), 0.5F);
 			}
 		}
@@ -105,8 +102,7 @@ public final class BiomeSync {
 		}
 		// Seasonal snow switched off on the server: players should see the rain that actually falls
 		boolean seasonalTemperature = config.visuals.sendSeasonalTemperature && config.snow.seasonalSnowPersistence;
-		return new Look(seasonalTemperature ? temperature : profile.baseTemperature(), grass, foliage, normal.dryFoliage(), birch, spruce, leafOverlay,
-				blossomOverlay);
+		return new Look(seasonalTemperature ? temperature : profile.baseTemperature(), grass, foliage, birch, spruce, leafOverlay, blossomOverlay);
 	}
 
 	/**
@@ -115,60 +111,66 @@ public final class BiomeSync {
 	 */
 	public static Look normal(Biome biome, float temperature, float downfall) {
 		BiomeSpecialEffects effects = biome.getSpecialEffects();
-		int grass = effects.grassColorModifier() == BiomeSpecialEffects.GrassColorModifier.SWAMP ? ColorMaps.SWAMP_GRASS
-				: effects.grassColorOverride().map(rgb -> rgb & 0xFFFFFF).orElseGet(() -> ColorMaps.grass(temperature, downfall));
-		int foliage = effects.foliageColorOverride().map(rgb -> rgb & 0xFFFFFF).orElseGet(() -> ColorMaps.foliage(temperature, downfall));
-		int dryFoliage = effects.dryFoliageColorOverride().map(rgb -> rgb & 0xFFFFFF).orElseGet(() -> ColorMaps.dryFoliage(temperature, downfall));
-		return new Look(temperature, grass, foliage, dryFoliage, FoliageColor.FOLIAGE_BIRCH & 0xFFFFFF, FoliageColor.FOLIAGE_EVERGREEN & 0xFFFFFF, WHITE, WHITE);
+		int grass = effects.getGrassColorModifier() == BiomeSpecialEffects.GrassColorModifier.SWAMP ? ColorMaps.SWAMP_GRASS
+				: effects.getGrassColorOverride().map(rgb -> rgb & 0xFFFFFF).orElseGet(() -> ColorMaps.grass(temperature, downfall));
+		int foliage = effects.getFoliageColorOverride().map(rgb -> rgb & 0xFFFFFF).orElseGet(() -> ColorMaps.foliage(temperature, downfall));
+		return new Look(temperature, grass, foliage, FoliageColor.getBirchColor() & 0xFFFFFF, FoliageColor.getEvergreenColor() & 0xFFFFFF, WHITE,
+				WHITE);
 	}
 
 	// ---- While joining
 
-	public static List<RegistrySynchronization.PackedRegistryEntry> rewrite(DynamicOps<Tag> ops, RegistryAccess registries,
-			List<RegistrySynchronization.PackedRegistryEntry> entries) {
+	/**
+	 * The biome codec of the registry data in the login packet, which writes the season into every biome it encodes.
+	 * Decoding (on a client with Seasonfall) is left to the game's own codec.
+	 */
+	public static Codec<Biome> joinCodec(Codec<Biome> codec) {
+		return new Codec<>() {
+			@Override
+			public <T> DataResult<Pair<Biome, T>> decode(DynamicOps<T> ops, T input) {
+				return codec.decode(ops, input);
+			}
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public <T> DataResult<T> encode(Biome biome, DynamicOps<T> ops, T prefix) {
+				return codec.encode(biome, ops, prefix).map(encoded -> encoded instanceof Tag tag ? (T) seasonal(biome, tag) : encoded);
+			}
+
+			@Override
+			public String toString() {
+				return "Seasonal[" + codec + "]";
+			}
+		};
+	}
+
+	/**
+	 * A biome's encoding for a joining player, with the season's temperature and colours where it has seasons. The game
+	 * encodes the login packet on a network thread, so this only reads what the server thread last worked out.
+	 */
+	private static Tag seasonal(Biome biome, Tag encoded) {
 		SeasonClock clock = Seasonfall.clock();
 		SeasonfallConfig config = SeasonfallConfig.get();
-		if (clock == null || !config.general.enabled || !config.visuals.enabled) {
-			return entries;
+		BiomeProfile profile = Climate.profile(biome);
+		if (clock == null || !config.general.enabled || !config.visuals.enabled || profile == null || !(encoded instanceof CompoundTag original)) {
+			return encoded;
 		}
-		Registry<Biome> biomes = registries.lookupOrThrow(Registries.BIOME);
-		float colorPhase = stagePhase(clock.yearProgress(), config.visuals.foliageStages);
-		List<RegistrySynchronization.PackedRegistryEntry> rewritten = new ArrayList<>(entries.size());
-		for (RegistrySynchronization.PackedRegistryEntry entry : entries) {
-			Biome biome = biomes.getValue(entry.id());
-			BiomeProfile profile = biome == null ? null : Climate.profile(biome);
-			if (profile == null) {
-				rewritten.add(entry);
-				continue;
-			}
-			try {
-				// The temperature right now, so a player who just joined agrees with the server about rain or snow
-				Look look = look(biome, profile, colorPhase, profile.baseTemperature() + Climate.offset(biome));
-				rewritten.add(new RegistrySynchronization.PackedRegistryEntry(entry.id(), Optional.of(encode(ops, biome, entry.data(), look))));
-			} catch (RuntimeException e) {
-				Seasonfall.LOGGER.error("Could not send the seasonal version of biome {}; sending it unchanged", entry.id(), e);
-				rewritten.add(entry);
-			}
+		try {
+			// The temperature right now, so a player who just joined agrees with the server about rain or snow
+			Look look = look(biome, profile, stagePhase(clock.yearProgress(), config.visuals.foliageStages),
+					profile.baseTemperature() + Climate.offset(biome));
+			CompoundTag tag = original.copy();
+			tag.putFloat(TEMPERATURE, look.temperature());
+			// A new, empty compound if it is missing
+			CompoundTag effects = tag.getCompound(EFFECTS);
+			effects.putInt(GRASS, look.grass());
+			effects.putInt(FOLIAGE, look.foliage());
+			tag.put(EFFECTS, effects);
+			return tag;
+		} catch (RuntimeException e) {
+			Seasonfall.LOGGER.error("Could not send the seasonal version of a biome; sending it unchanged", e);
+			return encoded;
 		}
-		return rewritten;
-	}
-
-	private static Tag encode(DynamicOps<Tag> ops, Biome biome, Optional<Tag> data, Look look) {
-		Tag encoded = data.map(Tag::copy).orElseGet(() -> Biome.NETWORK_CODEC.encodeStart(ops, biome).getOrThrow());
-		if (!(encoded instanceof CompoundTag tag)) {
-			throw new IllegalStateException("biome data is not an NBT compound");
-		}
-		tag.putFloat(TEMPERATURE, look.temperature());
-		CompoundTag effects = tag.getCompoundOrEmpty(EFFECTS);
-		putColor(ops, effects, GRASS, look.grass());
-		putColor(ops, effects, FOLIAGE, look.foliage());
-		putColor(ops, effects, DRY_FOLIAGE, look.dryFoliage());
-		tag.put(EFFECTS, effects);
-		return tag;
-	}
-
-	private static void putColor(DynamicOps<Tag> ops, CompoundTag effects, String key, int rgb) {
-		effects.put(key, ExtraCodecs.STRING_RGB_COLOR.encodeStart(ops, ARGB.opaque(rgb)).getOrThrow());
 	}
 
 	// ---- While playing (players with Seasonfall installed)
@@ -179,12 +181,12 @@ public final class BiomeSync {
 	 * Temperatures are for the same step of the year as the colours, so updates only change when the step does.
 	 */
 	public static List<BiomeSeasonPayload> livePayloads(MinecraftServer server, float colorPhase, boolean seasonal) {
-		DynamicOps<Tag> ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+		DynamicOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, server.registryAccess());
 		List<BiomeSeasonPayload.Entry> entries = new ArrayList<>();
-		server.registryAccess().lookupOrThrow(Registries.BIOME).listElements().forEach(holder -> {
+		server.registryAccess().registryOrThrow(Registries.BIOME).holders().forEach(holder -> {
 			Look look = liveLook(holder, colorPhase, seasonal, ops);
-			entries.add(new BiomeSeasonPayload.Entry(holder.key().identifier(), look.temperature(), look.grass(), look.foliage(), look.dryFoliage(),
-					look.birch(), look.spruce(), look.leafOverlay(), look.blossomOverlay()));
+			entries.add(new BiomeSeasonPayload.Entry(holder.key().location(), look.temperature(), look.grass(), look.foliage(), look.birch(),
+					look.spruce(), look.leafOverlay(), look.blossomOverlay()));
 		});
 		List<BiomeSeasonPayload> pages = new ArrayList<>();
 		for (int start = 0; start < entries.size(); start += BiomeSeasonPayload.MAX_PAGE_SIZE) {

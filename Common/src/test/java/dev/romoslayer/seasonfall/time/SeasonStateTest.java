@@ -86,7 +86,7 @@ class SeasonStateTest {
 		try (Stream<Path> files = Files.list(this.folder)) {
 			List<Path> aside = files.filter(path -> path.getFileName().toString().startsWith("seasonfall.json.unreadable-")).toList();
 			assertEquals(1, aside.size());
-			assertEquals("{ this is not json", Files.readString(aside.getFirst()));
+			assertEquals("{ this is not json", Files.readString(aside.get(0)));
 		}
 	}
 

@@ -99,7 +99,7 @@ public final class YearCalendar {
 
 	/** Season time at a point some way into a season of the current year. */
 	public long at(Season season, float progress) {
-		long into = (long) (Math.clamp(progress, 0.0F, 0.9999F) * this.lengths[season.ordinal()]);
+		long into = (long) (Math.max(0.0F, Math.min(0.9999F, progress)) * this.lengths[season.ordinal()]);
 		return this.atTickOfYear(this.seasonStart(season) + into);
 	}
 }
