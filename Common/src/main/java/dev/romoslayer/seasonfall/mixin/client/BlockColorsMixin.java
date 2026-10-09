@@ -38,9 +38,10 @@ public abstract class BlockColorsMixin {
 	/** Cherry, azalea and pale oak: no colour of their own, so the season's overlay is added if nothing else claimed them. */
 	@ModifyReturnValue(method = "createDefault", at = @At("RETURN"))
 	private static BlockColors seasonfall$texturedLeaves(BlockColors colors) {
-		seasonfall$overlay(colors, SeasonalTints.LEAF_OVERLAY, Blocks.AZALEA_LEAVES, Blocks.PALE_OAK_LEAVES);
-		// Their flowers are in the same texture: a gentler, warmer overlay keeps them from turning red
-		seasonfall$overlay(colors, SeasonalTints.BLOSSOM_OVERLAY, Blocks.CHERRY_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES);
+		seasonfall$overlay(colors, SeasonalTints.LEAF_OVERLAY, Blocks.PALE_OAK_LEAVES);
+		seasonfall$overlay(colors, SeasonalTints.AZALEA_OVERLAY, Blocks.AZALEA_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES);
+		// Cherry blossoms are in the same texture: a gentler, warmer overlay keeps them from turning red
+		seasonfall$overlay(colors, SeasonalTints.CHERRY_OVERLAY, Blocks.CHERRY_LEAVES);
 		return colors;
 	}
 

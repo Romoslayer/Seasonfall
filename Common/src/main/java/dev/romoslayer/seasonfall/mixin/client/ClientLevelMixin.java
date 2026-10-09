@@ -28,6 +28,7 @@ public abstract class ClientLevelMixin {
 		this.tintCaches.put(SeasonalTints.BIRCH, new BlockTintCache(pos -> this.calculateBlockTint(pos, SeasonalTints.BIRCH)));
 		this.tintCaches.put(SeasonalTints.SPRUCE, new BlockTintCache(pos -> this.calculateBlockTint(pos, SeasonalTints.SPRUCE)));
 		this.tintCaches.put(SeasonalTints.LEAF_OVERLAY, new BlockTintCache(pos -> this.calculateBlockTint(pos, SeasonalTints.LEAF_OVERLAY)));
-		this.tintCaches.put(SeasonalTints.BLOSSOM_OVERLAY, new BlockTintCache(pos -> this.calculateBlockTint(pos, SeasonalTints.BLOSSOM_OVERLAY)));
+		this.tintCaches.put(SeasonalTints.AZALEA_OVERLAY, new BlockTintCache(pos -> this.calculateBlockTint(pos, SeasonalTints.AZALEA_OVERLAY)));
+		this.tintCaches.put(SeasonalTints.CHERRY_OVERLAY, new BlockTintCache(pos -> this.calculateBlockTint(pos, SeasonalTints.CHERRY_OVERLAY)));
 	}
 }

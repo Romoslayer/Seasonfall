@@ -17,7 +17,7 @@ import net.minecraft.resources.Identifier;
  * The channel name carries the format version: a game with a different version simply does not announce this one.
  */
 public record BiomeSeasonPayload(List<Entry> biomes) implements CustomPacketPayload {
-	public static final CustomPacketPayload.Type<BiomeSeasonPayload> TYPE = new CustomPacketPayload.Type<>(Seasonfall.id("biome_looks_v5"));
+	public static final CustomPacketPayload.Type<BiomeSeasonPayload> TYPE = new CustomPacketPayload.Type<>(Seasonfall.id("biome_looks_v6"));
 	/** Entries per payload: about 30 KB at most, far below any packet limit. */
 	public static final int MAX_PAGE_SIZE = 512;
 
@@ -28,11 +28,12 @@ public record BiomeSeasonPayload(List<Entry> biomes) implements CustomPacketPayl
 	 * @param dryFoliage  leaf litter colour, 0xRRGGBB
 	 * @param birch       birch leaf colour, 0xRRGGBB
 	 * @param spruce      spruce leaf colour, 0xRRGGBB
-	 * @param leafOverlay colour multiplied over azalea and pale oak leaves, 0xRRGGBB (white: unchanged)
-	 * @param blossomOverlay colour multiplied over cherry and flowering azalea leaves, 0xRRGGBB (white: unchanged)
+	 * @param leafOverlay colour multiplied over pale oak leaves, 0xRRGGBB (white: unchanged)
+	 * @param azaleaOverlay  colour multiplied over azalea and flowering azalea leaves, 0xRRGGBB (white: unchanged)
+	 * @param cherryOverlay  colour multiplied over cherry leaves, 0xRRGGBB (white: unchanged)
 	 */
 	public record Entry(Identifier biome, float temperature, int grass, int foliage, int dryFoliage, int birch, int spruce, int leafOverlay,
-			int blossomOverlay) {
+			int azaleaOverlay, int cherryOverlay) {
 		static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
 				Identifier.STREAM_CODEC, Entry::biome,
 				ByteBufCodecs.FLOAT, Entry::temperature,
@@ -42,7 +43,8 @@ public record BiomeSeasonPayload(List<Entry> biomes) implements CustomPacketPayl
 				ByteBufCodecs.INT, Entry::birch,
 				ByteBufCodecs.INT, Entry::spruce,
 				ByteBufCodecs.INT, Entry::leafOverlay,
-				ByteBufCodecs.INT, Entry::blossomOverlay,
+				ByteBufCodecs.INT, Entry::azaleaOverlay,
+				ByteBufCodecs.INT, Entry::cherryOverlay,
 				Entry::new);
 	}
 

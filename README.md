@@ -46,8 +46,12 @@ What changes colour:
   unmodified game gives birch and spruce one fixed colour and takes the others' colour straight from their textures,
   which the server cannot change. With the mod, birch follows the biome's palette, spruce only shifts slightly (it keeps
   its needles), and azalea and pale oak keep their own colours in spring and summer, then take on the biome's autumn and
-  winter colours. Cherry and flowering azalea have their flowers in the same texture, so they only warm towards gold in
-  autumn (cherry goes peach, the azalea flowers stay pink) and fade a little in winter.
+  winter colours (azalea goes a dormant olive-brown in winter). Flowering azalea always matches plain azalea, since
+  the two grow mixed in one tree. Cherry has its blossoms in the same texture, so it only warms to peach in autumn,
+  then turns a soft pink-grey in winter.
+- **Falling leaves:** the leaves and petals that drift down from trees take the same colour as the leaves above them.
+  Players without Seasonfall see the falling leaves of biome-coloured trees (oak, jungle, acacia, dark oak, mangrove)
+  change with the season too; the rest, like their leaves, keep their normal look.
 - **Unchanged:** leaf litter, lily pads and stems.
 
 Biome colours are per biome, not per dimension: if a dimension without seasons uses a biome that also appears in one

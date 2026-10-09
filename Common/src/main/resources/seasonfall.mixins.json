@@ -15,7 +15,9 @@
   ],
   "client": [
     "client.BlockColorsMixin",
-    "client.ClientLevelMixin"
+    "client.ClientLevelMixin",
+    "client.FallingLeavesParticleMixin",
+    "client.UntintedParticleLeavesBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1
