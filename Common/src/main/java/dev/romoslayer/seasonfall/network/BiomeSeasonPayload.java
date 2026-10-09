@@ -6,7 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Sent only to players who have Seasonfall installed themselves (their game announces the channel; unmodified games
@@ -14,36 +14,43 @@ import net.minecraft.resources.Identifier;
  * the full, authoritative look of one biome, its normal look included, so an update can also undo a season. A large
  * biome list is split over several of these.
  * <p>
- * The channel name carries the format version: a game with a different version simply does not announce this one.
+ * The channel name carries the game and format version: a game with a different one (through a version-translating
+ * proxy, say) simply does not announce this one.
  */
 public record BiomeSeasonPayload(List<Entry> biomes) implements CustomPacketPayload {
-	public static final CustomPacketPayload.Type<BiomeSeasonPayload> TYPE = new CustomPacketPayload.Type<>(Seasonfall.id("biome_looks_v5"));
+	public static final CustomPacketPayload.Type<BiomeSeasonPayload> TYPE = new CustomPacketPayload.Type<>(Seasonfall.id("biome_looks_mc1211_v1"));
 	/** Entries per payload: about 30 KB at most, far below any packet limit. */
 	public static final int MAX_PAGE_SIZE = 512;
 
 	/**
-	 * @param temperature the temperature the client should use for rain or snow (season included, if any)
-	 * @param grass       grass colour, 0xRRGGBB
-	 * @param foliage     leaf colour, 0xRRGGBB
-	 * @param dryFoliage  leaf litter colour, 0xRRGGBB
-	 * @param birch       birch leaf colour, 0xRRGGBB
-	 * @param spruce      spruce leaf colour, 0xRRGGBB
-	 * @param leafOverlay colour multiplied over azalea and pale oak leaves, 0xRRGGBB (white: unchanged)
+	 * @param temperature    the temperature the client should use for rain or snow (season included, if any)
+	 * @param grass          grass colour, 0xRRGGBB
+	 * @param foliage        leaf colour, 0xRRGGBB
+	 * @param birch          birch leaf colour, 0xRRGGBB
+	 * @param spruce         spruce leaf colour, 0xRRGGBB
+	 * @param leafOverlay    colour multiplied over azalea leaves, 0xRRGGBB (white: unchanged)
 	 * @param blossomOverlay colour multiplied over cherry and flowering azalea leaves, 0xRRGGBB (white: unchanged)
 	 */
-	public record Entry(Identifier biome, float temperature, int grass, int foliage, int dryFoliage, int birch, int spruce, int leafOverlay,
+	public record Entry(ResourceLocation biome, float temperature, int grass, int foliage, int birch, int spruce, int leafOverlay,
 			int blossomOverlay) {
-		static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
-				Identifier.STREAM_CODEC, Entry::biome,
-				ByteBufCodecs.FLOAT, Entry::temperature,
-				ByteBufCodecs.INT, Entry::grass,
-				ByteBufCodecs.INT, Entry::foliage,
-				ByteBufCodecs.INT, Entry::dryFoliage,
-				ByteBufCodecs.INT, Entry::birch,
-				ByteBufCodecs.INT, Entry::spruce,
-				ByteBufCodecs.INT, Entry::leafOverlay,
-				ByteBufCodecs.INT, Entry::blossomOverlay,
-				Entry::new);
+		// More fields than StreamCodec.composite takes on this version, so written out by hand
+		static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.of(Entry::write, Entry::read);
+
+		private static void write(RegistryFriendlyByteBuf buf, Entry entry) {
+			ResourceLocation.STREAM_CODEC.encode(buf, entry.biome());
+			buf.writeFloat(entry.temperature());
+			buf.writeInt(entry.grass());
+			buf.writeInt(entry.foliage());
+			buf.writeInt(entry.birch());
+			buf.writeInt(entry.spruce());
+			buf.writeInt(entry.leafOverlay());
+			buf.writeInt(entry.blossomOverlay());
+		}
+
+		private static Entry read(RegistryFriendlyByteBuf buf) {
+			return new Entry(ResourceLocation.STREAM_CODEC.decode(buf), buf.readFloat(), buf.readInt(), buf.readInt(), buf.readInt(), buf.readInt(),
+					buf.readInt(), buf.readInt());
+		}
 	}
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, BiomeSeasonPayload> STREAM_CODEC = Entry.STREAM_CODEC

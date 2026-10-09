@@ -26,8 +26,6 @@ public interface SeasonalBiome {
 
 	int seasonfall$clientFoliage();
 
-	int seasonfall$clientDryFoliage();
-
 	/** Birch leaves (which the game otherwise colours the same everywhere). */
 	int seasonfall$clientBirch();
 
@@ -35,14 +33,13 @@ public interface SeasonalBiome {
 	int seasonfall$clientSpruce();
 
 	/**
-	 * A colour multiplied over leaves whose colour comes from their texture (cherry, azalea, pale oak): white leaves
-	 * them as they are.
+	 * A colour multiplied over leaves whose colour comes from their texture (cherry, azalea): white leaves them as they
+	 * are.
 	 */
 	int seasonfall$clientLeafOverlay();
 
 	/** The same for blossoming leaves (cherry, flowering azalea), which get a gentler, warmer overlay. */
 	int seasonfall$clientBlossomOverlay();
 
-	void seasonfall$setClientSeason(float temperatureChange, int grass, int foliage, int dryFoliage, int birch, int spruce, int leafOverlay,
-			int blossomOverlay);
+	void seasonfall$setClientSeason(float temperatureChange, int grass, int foliage, int birch, int spruce, int leafOverlay, int blossomOverlay);
 }

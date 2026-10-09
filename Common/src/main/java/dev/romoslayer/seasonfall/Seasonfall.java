@@ -6,7 +6,7 @@ import dev.romoslayer.seasonfall.config.SeasonfallConfig;
 import dev.romoslayer.seasonfall.platform.Platform;
 import dev.romoslayer.seasonfall.time.SeasonClock;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -26,8 +26,8 @@ public final class Seasonfall {
 	private Seasonfall() {
 	}
 
-	public static Identifier id(String path) {
-		return Identifier.fromNamespaceAndPath(MOD_ID, path);
+	public static ResourceLocation id(String path) {
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
 	}
 
 	public static void init(Platform loaderPlatform) {

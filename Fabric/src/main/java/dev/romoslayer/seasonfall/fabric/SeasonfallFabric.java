@@ -18,7 +18,7 @@ public final class SeasonfallFabric implements ModInitializer, Platform {
 	public void onInitialize() {
 		Seasonfall.init(this);
 		// Only games with Seasonfall announce this channel, so only they are ever sent it
-		PayloadTypeRegistry.clientboundPlay().register(BiomeSeasonPayload.TYPE, BiomeSeasonPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playS2C().register(BiomeSeasonPayload.TYPE, BiomeSeasonPayload.STREAM_CODEC);
 		ServerLifecycleEvents.SERVER_STARTED.register(Seasonfall::onServerStarted);
 		ServerLifecycleEvents.SERVER_STOPPING.register(Seasonfall::onServerStopping);
 		ServerTickEvents.END_SERVER_TICK.register(Seasonfall::onServerTickEnd);

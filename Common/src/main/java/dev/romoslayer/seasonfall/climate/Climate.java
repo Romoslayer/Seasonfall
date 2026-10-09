@@ -42,7 +42,7 @@ public final class Climate {
 	public static void stop(MinecraftServer server) {
 		serverThread = null;
 		seasonalDimensions = Set.of();
-		biomes(server).listElements().forEach(holder -> seasonal(holder.value()).seasonfall$setSeason(null, 0.0F));
+		biomes(server).holders().forEach(holder -> seasonal(holder.value()).seasonfall$setSeason(null, 0.0F));
 	}
 
 	/** Works out every biome's profile again, from scratch: after a config or data pack reload. */
@@ -50,7 +50,7 @@ public final class Climate {
 		Set<Biome> seasonalBiomes = biomesWithSeasons(server);
 		DynamicOps<Tag> ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 		boolean enabled = SeasonfallConfig.get().general.enabled;
-		biomes(server).listElements().forEach(holder -> {
+		biomes(server).holders().forEach(holder -> {
 			BiomeProfile profile = enabled && seasonalBiomes.contains(holder.value()) ? BiomeProfiles.profile(holder, ops) : null;
 			seasonal(holder.value()).seasonfall$setSeason(profile, profile == null ? 0.0F : temperatureOffset(profile, phase));
 		});
@@ -59,7 +59,7 @@ public final class Climate {
 	/** Moves every biome's temperature along to this point in the year. */
 	public static void update(MinecraftServer server, float phase) {
 		float curve = curve(phase);
-		biomes(server).listElements().forEach(holder -> {
+		biomes(server).holders().forEach(holder -> {
 			SeasonalBiome biome = seasonal(holder.value());
 			BiomeProfile profile = biome.seasonfall$profile();
 			if (profile != null) {
@@ -74,7 +74,7 @@ public final class Climate {
 		Set<ResourceKey<Level>> dimensionsWithSeasons = new HashSet<>();
 		SeasonfallConfig.Dimensions dimensions = SeasonfallConfig.get().dimensions;
 		for (ServerLevel level : server.getAllLevels()) {
-			if (dimensions.hasSeasons(level.dimension().identifier().toString())) {
+			if (dimensions.hasSeasons(level.dimension().location().toString())) {
 				dimensionsWithSeasons.add(level.dimension());
 				for (Holder<Biome> biome : level.getChunkSource().getGenerator().getBiomeSource().possibleBiomes()) {
 					result.add(biome.value());
@@ -184,7 +184,7 @@ public final class Climate {
 	}
 
 	private static Registry<Biome> biomes(MinecraftServer server) {
-		return server.registryAccess().lookupOrThrow(Registries.BIOME);
+		return server.registryAccess().registryOrThrow(Registries.BIOME);
 	}
 
 	private static SeasonalBiome seasonal(Biome biome) {

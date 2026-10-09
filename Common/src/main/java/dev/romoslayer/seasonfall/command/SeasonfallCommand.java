@@ -48,7 +48,7 @@ public final class SeasonfallCommand {
 		}
 
 		dispatcher.register(Commands.literal("seasonfall")
-				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.literal("season").executes(SeasonfallCommand::season))
 				.then(setSeason)
 				.then(Commands.literal("setday")
@@ -81,7 +81,7 @@ public final class SeasonfallCommand {
 		ServerLevel level = source.getLevel();
 		BlockPos pos = BlockPos.containing(source.getPosition());
 		Holder<Biome> holder = level.getBiome(pos);
-		String biomeName = holder.unwrapKey().map(key -> key.identifier().toString()).orElse("this biome");
+		String biomeName = holder.unwrapKey().map(key -> key.location().toString()).orElse("this biome");
 		BiomeProfile profile = Climate.hasSeasons(level) ? Climate.profile(holder) : null;
 		if (profile == null) {
 			send(source, line("Here (" + biomeName + "): no seasons."));

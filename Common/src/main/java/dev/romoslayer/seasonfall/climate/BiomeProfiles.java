@@ -7,7 +7,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
@@ -46,7 +46,7 @@ public final class BiomeProfiles {
 		BiomeStyle style = derive(holder, temperature, downfall, precipitation);
 
 		SeasonfallConfig.BiomeOverride override = holder.unwrapKey()
-				.map(key -> SeasonfallConfig.get().biomeOverrides.get(key.identifier().toString()))
+				.map(key -> SeasonfallConfig.get().biomeOverrides.get(key.location().toString()))
 				.orElse(null);
 		if (override == null) {
 			return new BiomeProfile(style, temperature, downfall, precipitation, style.temperatureSeasonality(), style.foliageChange(),
@@ -117,7 +117,7 @@ public final class BiomeProfiles {
 	private static float readDownfall(Biome biome, DynamicOps<Tag> ops) {
 		try {
 			Tag encoded = Biome.NETWORK_CODEC.encodeStart(ops, biome).getOrThrow();
-			return encoded instanceof CompoundTag tag ? tag.getFloatOr("downfall", 0.5F) : 0.5F;
+			return encoded instanceof CompoundTag tag && tag.contains("downfall", Tag.TAG_ANY_NUMERIC) ? tag.getFloat("downfall") : 0.5F;
 		} catch (RuntimeException e) {
 			Seasonfall.LOGGER.warn("Could not read a biome's downfall, assuming 0.5: {}", e.getMessage());
 			return 0.5F;
@@ -129,6 +129,6 @@ public final class BiomeProfiles {
 	}
 
 	private static TagKey<Biome> common(String path) {
-		return TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("c", path));
+		return TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("c", path));
 	}
 }

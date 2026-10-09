@@ -58,7 +58,7 @@ public final class SeasonfallApi {
 
 	/** Whether this dimension has seasons at all. */
 	public static boolean hasSeasons(ServerLevel level) {
-		return isActive() && SeasonfallConfig.get().dimensions.hasSeasons(level.dimension().identifier().toString());
+		return isActive() && SeasonfallConfig.get().dimensions.hasSeasons(level.dimension().location().toString());
 	}
 
 	/** The seasonal climate at a place: what a weather mod should apply on top of the biome's normal weather. */

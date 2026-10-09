@@ -15,7 +15,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
@@ -58,7 +58,7 @@ public final class CropGrowth {
 		OVERRIDES.clear();
 		SeasonfallConfig.Crops config = SeasonfallConfig.get().crops;
 		for (Map.Entry<String, JsonElement> entry : config.cropOverrides.entrySet()) {
-			Identifier id = Identifier.tryParse(entry.getKey());
+			ResourceLocation id = ResourceLocation.tryParse(entry.getKey());
 			Optional<Block> block = id == null ? Optional.empty() : BuiltInRegistries.BLOCK.getOptional(id);
 			if (block.isEmpty()) {
 				// Probably a mod that is not installed

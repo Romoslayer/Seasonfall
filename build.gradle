@@ -1,12 +1,14 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
+    // 1.21.1 still ships obfuscated, so Fabric needs Loom's remapping variant
+    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}" apply false
     id 'net.neoforged.moddev' version "${moddev_version}" apply false
     id 'net.minecraftforge.gradle' version "${forgegradle_version}" apply false
+    id 'net.minecraftforge.jarjar' version "${forge_jarjar_version}" apply false
 }
 
 tasks.register('build') {
     group = 'build'
-    description = 'Runs the unit tests and builds the Fabric, NeoForge and Forge jars for the selected Minecraft version (-Pmc=26.2 or 26.3).'
+    description = 'Runs the unit tests and builds the Fabric, NeoForge and Forge jars for Minecraft 1.21.1.'
     dependsOn ':Common:test', ':Fabric:build', ':NeoForge:build', ':Forge:build'
 }
 
@@ -14,7 +16,7 @@ tasks.register('clean', Delete) {
     delete layout.buildDirectory
 }
 
-// ---- gradlew runVanillaClient [-Pmc=26.2] [-Pserver=localhost:25566]: the official, unmodded game, started the way the
+// ---- gradlew runVanillaClient [-Pserver=localhost:25566]: the official, unmodded game, started the way the
 // Minecraft launcher starts it and sent straight to a server (default localhost:25565; start one with :Fabric:runServer,
 // :NeoForge:runServer or :Forge:runServer). Shows
 // what players without the mod see. Game files come from your launcher installation or Gradle's cache and are each
@@ -46,8 +48,18 @@ tasks.register('runVanillaClient') {
 	doLast {
 		def version = mc_version
 		def gameDir = layout.buildDirectory.dir("run/vanilla-${version}").get().asFile
+		// The launcher's version file, or the copy Loom downloaded when the launcher has never installed this version;
+		// either must be the one Mojang's version list names
 		def versionFile = new File(minecraftDir, "versions/${version}/${version}.json")
-		if (!versionFile.isFile()) throw new GradleException("Minecraft ${version} is not in your launcher: ${versionFile} is missing")
+		def loomVersionFile = new File(gradleCaches, "fabric-loom/${version}/mojang_minecraft_info.json")
+		def versionList = new File(gradleCaches, 'fabric-loom/mojang_versions_manifest.json')
+		def listed = versionList.isFile() ? new groovy.json.JsonSlurper().parse(versionList).versions.find { it.id == version } : null
+		if (!versionFile.isFile()) {
+			if (!listed || !loomVersionFile.isFile()) {
+				throw new GradleException("Minecraft ${version} is not in your launcher (${versionFile} is missing); build the Fabric jar once so Loom downloads it")
+			}
+			versionFile = officialFile("the Minecraft ${version} version file", listed.sha1, [loomVersionFile])
+		}
 		def info = new groovy.json.JsonSlurper().parse(versionFile)
 
 		def classpath = info.libraries.findAll { appliesHere(it.rules) && it.downloads?.artifact }.collect { library ->

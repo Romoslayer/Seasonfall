@@ -1,6 +1,7 @@
 plugins {
     id 'multiloader-loader'
     id 'net.minecraftforge.gradle'
+    id 'net.minecraftforge.jarjar'
 }
 
 // ForgeGradle only fills in the launch settings of runs Forge defines itself (client, server, ...), so the second client
@@ -9,6 +10,9 @@ plugins {
 def moddedClient = gradle.startParameter.taskNames.any { it == 'runModdedClient' || it.endsWith(':runModdedClient') }
 
 minecraft {
+    // 1.21.1 ships obfuscated; build against Mojang's names, which Forge 52 also runs on
+    mappings channel: 'official', version: mc_version
+
     runs {
         configureEach {
             // Dev runs load the mod from folders, so Mixin cannot read the config from the jar manifest
@@ -39,13 +43,29 @@ repositories {
     maven fg.minecraftLibsMaven
 }
 
+// The published jar is the one with MixinExtras inside; the plain jar becomes "-slim"
+jarJar.register {
+    archiveClassifier = null
+}
+
 dependencies {
     implementation minecraft.dependency("net.minecraftforge:forge:${forge_version}")
+    // Forge 52 does not ship MixinExtras (NeoForge and Fabric Loader do), so the jar carries it
+    compileOnly "io.github.llamalad7:mixinextras-common:${mixinextras_version}"
+    annotationProcessor "io.github.llamalad7:mixinextras-common:${mixinextras_version}"
+    jarJar "io.github.llamalad7:mixinextras-forge:${mixinextras_version}"
+    // Dev runs use the classes directly, so they need it on the runtime classpath too
+    runtimeOnly "io.github.llamalad7:mixinextras-forge:${mixinextras_version}"
 }
 
 jar {
+    archiveClassifier = 'slim'
     // Forge has no mods.toml entry for mixins: Mixin finds the config through the manifest
     manifest {
         attributes 'MixinConfigs': "${mod_id}.mixins.json"
     }
+}
+
+tasks.named('build') {
+    dependsOn 'jarJar'
 }

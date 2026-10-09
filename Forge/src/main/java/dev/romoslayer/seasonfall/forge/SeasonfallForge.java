@@ -7,11 +7,13 @@ import dev.romoslayer.seasonfall.platform.Platform;
 import java.nio.file.Path;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -36,12 +38,13 @@ public final class SeasonfallForge implements Platform {
 	public SeasonfallForge() {
 		Seasonfall.init(this);
 
-		ServerStartedEvent.BUS.addListener(event -> Seasonfall.onServerStarted(event.getServer()));
-		ServerStoppingEvent.BUS.addListener(event -> Seasonfall.onServerStopping(event.getServer()));
-		TickEvent.ServerTickEvent.Post.BUS.addListener(event -> Seasonfall.onServerTickEnd(event.server()));
-		RegisterCommandsEvent.BUS.addListener(event -> Seasonfall.registerCommands(event.getDispatcher()));
+		IEventBus bus = MinecraftForge.EVENT_BUS;
+		bus.addListener((ServerStartedEvent event) -> Seasonfall.onServerStarted(event.getServer()));
+		bus.addListener((ServerStoppingEvent event) -> Seasonfall.onServerStopping(event.getServer()));
+		bus.addListener((TickEvent.ServerTickEvent.Post event) -> Seasonfall.onServerTickEnd(event.getServer()));
+		bus.addListener((RegisterCommandsEvent event) -> Seasonfall.registerCommands(event.getDispatcher()));
 		// No player: data packs were reloaded for everyone (/reload)
-		OnDatapackSyncEvent.BUS.addListener(event -> {
+		bus.addListener((OnDatapackSyncEvent event) -> {
 			if (event.getPlayer() == null) {
 				Seasonfall.onDataPackReload(event.getPlayerList().getServer());
 			}
@@ -55,7 +58,7 @@ public final class SeasonfallForge implements Platform {
 
 	@Override
 	public boolean isModLoaded(String modId) {
-		return ModList.isLoaded(modId);
+		return ModList.get().isLoaded(modId);
 	}
 
 	@Override
