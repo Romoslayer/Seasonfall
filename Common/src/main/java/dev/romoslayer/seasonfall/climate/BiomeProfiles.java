@@ -25,15 +25,18 @@ public final class BiomeProfiles {
 	/** Rain turns to snow, and still water freezes, below this temperature. */
 	public static final float FREEZING = 0.15F;
 
-	// Shared "c" tags that Fabric and NeoForge both fill in, which modded biomes usually join
+	/** Biomes that keep their normal look and climate all year, even in a dimension with seasons. */
+	public static final TagKey<Biome> WITHOUT_SEASONS = TagKey.create(Registries.BIOME, Seasonfall.id("without_seasons"));
+
+	// Shared "c" tags that Fabric, NeoForge and Forge all fill in, which modded biomes usually join
 	private static final TagKey<Biome> SNOWY = common("is_snowy");
 	private static final TagKey<Biome> ICY = common("is_icy");
 	private static final TagKey<Biome> DESERT = common("is_desert");
 	private static final TagKey<Biome> SWAMP = common("is_swamp");
-	private static final TagKey<Biome> CONIFEROUS = common("is_coniferous_tree");
-	private static final TagKey<Biome> DECIDUOUS = common("is_deciduous_tree");
-	private static final TagKey<Biome> JUNGLE_TREES = common("is_jungle_tree");
-	private static final TagKey<Biome> SAVANNA_TREES = common("is_savanna_tree");
+	private static final TagKey<Biome> CONIFEROUS = common("is_tree/coniferous");
+	private static final TagKey<Biome> DECIDUOUS = common("is_tree/deciduous");
+	private static final TagKey<Biome> JUNGLE_TREES = common("is_tree/jungle");
+	private static final TagKey<Biome> SAVANNA_TREES = common("is_tree/savanna");
 
 	private BiomeProfiles() {
 	}

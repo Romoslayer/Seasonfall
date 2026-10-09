@@ -59,6 +59,10 @@ the overworld). A biome that no seasonal dimension generates, for example one on
 normal look. Large biome lists are fine: tested with about 1,470 biomes on Fabric and NeoForge, with and without the mod
 on the player's side.
 
+**Terralith** works out of the box: its biomes are sorted into styles from their own climate and tags like any others
+(deserts and mesas stay dry, jungles barely change, its temperate forests and valleys get snow in winter). Its Skylands
+islands, each already themed after one season, are left without seasons, as Terralith asks of other seasons mods.
+
 ## Installing
 
 Put the jar for your loader and game version in the server's `mods` folder (Fabric also needs Fabric API). Optionally
@@ -114,6 +118,8 @@ allowed. `biomeOverrides` can change any of it per biome, for example:
 
 - Blocks: `seasonfall:crops/warm_season`, `seasonfall:crops/cool_season`, `seasonfall:crops/default`,
   `seasonfall:vegetation`, `seasonfall:greenhouse_glass`
+- Biomes: `seasonfall:without_seasons`, biomes that keep their normal look and climate all year. It holds Terralith's
+  Skylands (`#terralith:skylands`), which are already themed after one season each.
 
 Change them with a data pack like any other tag. The whole random tick of a block in a crop tag is sped up or slowed down, not only
 its growth, so only add plants whose random tick is about growing. Growth up to 4 times normal is supported: above 1, a

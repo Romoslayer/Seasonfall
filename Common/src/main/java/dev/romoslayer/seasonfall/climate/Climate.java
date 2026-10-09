@@ -51,7 +51,8 @@ public final class Climate {
 		DynamicOps<Tag> ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 		boolean enabled = SeasonfallConfig.get().general.enabled;
 		biomes(server).listElements().forEach(holder -> {
-			BiomeProfile profile = enabled && seasonalBiomes.contains(holder.value()) ? BiomeProfiles.profile(holder, ops) : null;
+			BiomeProfile profile = enabled && seasonalBiomes.contains(holder.value()) && !holder.is(BiomeProfiles.WITHOUT_SEASONS)
+					? BiomeProfiles.profile(holder, ops) : null;
 			seasonal(holder.value()).seasonfall$setSeason(profile, profile == null ? 0.0F : temperatureOffset(profile, phase));
 		});
 	}
