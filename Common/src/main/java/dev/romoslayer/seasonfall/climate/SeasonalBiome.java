@@ -33,13 +33,13 @@ public interface SeasonalBiome {
 	int seasonfall$clientSpruce();
 
 	/**
-	 * A colour multiplied over leaves whose colour comes from their texture (cherry, azalea): white leaves them as they
-	 * are.
+	 * A colour multiplied over azalea and flowering azalea leaves, whose colour comes from their texture: white leaves
+	 * them as they are. They go olive-brown in winter.
 	 */
-	int seasonfall$clientLeafOverlay();
+	int seasonfall$clientAzaleaOverlay();
 
-	/** The same for blossoming leaves (cherry, flowering azalea), which get a gentler, warmer overlay. */
-	int seasonfall$clientBlossomOverlay();
+	/** The same for cherry leaves: the gentler overlay, and grey in winter. */
+	int seasonfall$clientCherryOverlay();
 
-	void seasonfall$setClientSeason(float temperatureChange, int grass, int foliage, int birch, int spruce, int leafOverlay, int blossomOverlay);
+	void seasonfall$setClientSeason(float temperatureChange, int grass, int foliage, int birch, int spruce, int azaleaOverlay, int cherryOverlay);
 }

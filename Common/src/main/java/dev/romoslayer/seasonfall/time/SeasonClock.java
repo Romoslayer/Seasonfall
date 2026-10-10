@@ -44,7 +44,8 @@ public final class SeasonClock {
 		if (loaded == null) {
 			loaded = new SeasonState();
 			SeasonfallConfig config = SeasonfallConfig.get();
-			loaded.seasonTicks = new YearCalendar(0, config.seasonLength).at(config.startingSeason(), 0.0F);
+			Season starting = config.startingSeason(server.overworld().getSeed());
+			loaded.seasonTicks = new YearCalendar(0, config.seasonLength).at(starting, 0.0F);
 			this.dirty = true;
 		}
 		this.state = loaded;

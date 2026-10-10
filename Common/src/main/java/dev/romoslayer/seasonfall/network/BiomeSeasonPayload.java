@@ -17,21 +17,21 @@ import net.minecraft.resources.ResourceLocation;
  * proxy, say) simply does not announce this one.
  */
 public record BiomeSeasonPayload(List<Entry> biomes) {
-	public static final ResourceLocation ID = Seasonfall.id("biome_looks_mc1201_v1");
+	public static final ResourceLocation ID = Seasonfall.id("biome_looks_mc1201_v2");
 	/** Entries per payload: about 30 KB at most, far below any packet limit. */
 	public static final int MAX_PAGE_SIZE = 512;
 
 	/**
-	 * @param temperature    the temperature the client should use for rain or snow (season included, if any)
-	 * @param grass          grass colour, 0xRRGGBB
-	 * @param foliage        leaf colour, 0xRRGGBB
-	 * @param birch          birch leaf colour, 0xRRGGBB
-	 * @param spruce         spruce leaf colour, 0xRRGGBB
-	 * @param leafOverlay    colour multiplied over azalea leaves, 0xRRGGBB (white: unchanged)
-	 * @param blossomOverlay colour multiplied over cherry and flowering azalea leaves, 0xRRGGBB (white: unchanged)
+	 * @param temperature   the temperature the client should use for rain or snow (season included, if any)
+	 * @param grass         grass colour, 0xRRGGBB
+	 * @param foliage       leaf colour, 0xRRGGBB
+	 * @param birch         birch leaf colour, 0xRRGGBB
+	 * @param spruce        spruce leaf colour, 0xRRGGBB
+	 * @param azaleaOverlay colour multiplied over azalea and flowering azalea leaves, 0xRRGGBB (white: unchanged)
+	 * @param cherryOverlay colour multiplied over cherry leaves, 0xRRGGBB (white: unchanged)
 	 */
-	public record Entry(ResourceLocation biome, float temperature, int grass, int foliage, int birch, int spruce, int leafOverlay,
-			int blossomOverlay) {
+	public record Entry(ResourceLocation biome, float temperature, int grass, int foliage, int birch, int spruce, int azaleaOverlay,
+			int cherryOverlay) {
 		private void write(FriendlyByteBuf buf) {
 			buf.writeResourceLocation(this.biome);
 			buf.writeFloat(this.temperature);
@@ -39,8 +39,8 @@ public record BiomeSeasonPayload(List<Entry> biomes) {
 			buf.writeInt(this.foliage);
 			buf.writeInt(this.birch);
 			buf.writeInt(this.spruce);
-			buf.writeInt(this.leafOverlay);
-			buf.writeInt(this.blossomOverlay);
+			buf.writeInt(this.azaleaOverlay);
+			buf.writeInt(this.cherryOverlay);
 		}
 
 		private static Entry read(FriendlyByteBuf buf) {

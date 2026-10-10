@@ -26,8 +26,12 @@ public final class BiomeProfiles {
 	/** Rain turns to snow, and still water freezes, below this temperature. */
 	public static final float FREEZING = 0.15F;
 
+	/** Biomes that keep their normal look and climate all year, even in a dimension with seasons. */
+	public static final TagKey<Biome> WITHOUT_SEASONS = TagKey.create(Registries.BIOME, Seasonfall.id("without_seasons"));
+
 	// The loaders' shared biome tags, which modded biomes usually join. On 1.20.1 Fabric fills in "c" tags and Forge (and
-	// NeoForge 47) its own "forge" ones, under different names, so a biome counts if it is in either.
+	// NeoForge 47) its own "forge" ones, under different names, so a biome counts if it is in either. Forge has no icy,
+	// deciduous, jungle or savanna tree tags on this version.
 	private static final List<TagKey<Biome>> SNOWY = List.of(tag("c", "snowy"), tag("forge", "is_snowy"));
 	private static final List<TagKey<Biome>> ICY = List.of(tag("c", "icy"));
 	private static final List<TagKey<Biome>> DESERT = List.of(tag("c", "desert"), tag("forge", "is_desert"));

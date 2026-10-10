@@ -24,7 +24,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 /** The Forge entrypoint, which NeoForge 47 (still a Forge fork on 1.20.1) loads as well. */
 @Mod(Seasonfall.MOD_ID)
 public final class SeasonfallForge implements Platform {
-	private static final String PROTOCOL = "1";
+	private static final String PROTOCOL = "2";
 	/**
 	 * Optional on both sides, so that games without Seasonfall (vanilla, Forge or NeoForge) can still join; only games
 	 * that have it are sent live updates. The handler only ever runs in a game client.

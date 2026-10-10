@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.SplittableRandom;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,9 @@ public final class SeasonfallConfig {
 	public static final float MAX_GROWTH = 4.0F;
 	/** Longest a season may be, in days. */
 	public static final int MAX_SEASON_DAYS = 10000;
+	/** {@code general.startingSeason} value for a season picked from the world seed. */
+	public static final String RANDOM_SEASON = "random";
+	private static final long STARTING_SEASON_SALT = 0x5EA50F_A11_5EA5L;
 
 	private static @Nullable SeasonfallConfig instance;
 	private static @Nullable Path file;
@@ -77,8 +81,10 @@ public final class SeasonfallConfig {
 				Hold the year while nobody is online, so the seasons only pass while people are playing. The server itself keeps
 				running with nobody on.""")
 		public boolean pauseWhenEmpty = true;
-		@Comment("The season a new world starts in.")
-		public String startingSeason = Season.SPRING.id();
+		@Comment("""
+				The season a new world starts in: spring, summer, autumn, winter, or random (one of the four, picked from the
+				world seed, so the same seed always starts in the same season).""")
+		public String startingSeason = RANDOM_SEASON;
 	}
 
 	public static final class SeasonLengths {
@@ -317,9 +323,10 @@ public final class SeasonfallConfig {
 	SeasonfallConfig validated(Problems problems) {
 		SeasonfallConfig defaults = new SeasonfallConfig();
 		if (this.general == null) this.general = defaults.general;
-		if (this.general.startingSeason == null || parseSeason(this.general.startingSeason) == null) {
+		if (this.general.startingSeason == null
+				|| (!isRandomSeason(this.general.startingSeason) && parseSeason(this.general.startingSeason) == null)) {
 			if (this.general.startingSeason != null) {
-				problems.add("general.startingSeason must be spring, summer, autumn or winter; using spring");
+				problems.add("general.startingSeason must be spring, summer, autumn, winter or random; using random");
 			}
 			this.general.startingSeason = defaults.general.startingSeason;
 		}
@@ -493,9 +500,18 @@ public final class SeasonfallConfig {
 	}
 	// ---- Lookups
 
-	public Season startingSeason() {
+	/** The season a new world with this seed starts in. */
+	public Season startingSeason(long worldSeed) {
+		if (isRandomSeason(this.general.startingSeason)) {
+			// Salted, so the season does not follow anything else the game derives from the seed
+			return Season.values()[new SplittableRandom(worldSeed ^ STARTING_SEASON_SALT).nextInt(Season.values().length)];
+		}
 		Season season = parseSeason(this.general.startingSeason);
 		return season == null ? Season.SPRING : season;
+	}
+
+	private static boolean isRandomSeason(String id) {
+		return RANDOM_SEASON.equals(id.toLowerCase(Locale.ROOT));
 	}
 
 	public static @Nullable Season parseSeason(String id) {

@@ -39,17 +39,28 @@ public final class BiomeSync {
 	private static final String FOLIAGE = "foliage_color";
 
 	/**
-	 * How much of the season shows on leaves whose colour is in their texture (azalea): none in spring and summer, then
-	 * the biome's autumn and winter colours laid over the texture.
+	 * Cherry leaves are nearly all blossom, so a strong autumn colour turns them red. They warm towards gold in autumn
+	 * instead.
 	 */
-	private static final SeasonValues TEXTURED_LEAVES = new SeasonValues(0.0F, 0.0F, 1.0F, 0.8F);
+	private static final int CHERRY_GOLD = 0xFFD04A;
+	private static final SeasonValues CHERRY_GOLD_AMOUNT = new SeasonValues(0.0F, 0.0F, 0.55F, 0.0F);
 	/**
-	 * Blossoming leaves (cherry, flowering azalea) have their flowers in the same texture, so a strong autumn colour turns
-	 * them red. They warm towards gold in autumn instead, and only fade a little in winter.
+	 * An overlay only darkens, and a darker pink or green is still pink or green. So in winter cherry also gets a cool
+	 * tint that cancels its pink (the texture averages #E5ADC2), leaving a soft pink-grey, and fades less than other
+	 * leaves so it does not turn ashen next to the snow.
 	 */
-	private static final int BLOSSOM_GOLD = 0xFFD04A;
-	private static final SeasonValues BLOSSOM_GOLD_AMOUNT = new SeasonValues(0.0F, 0.0F, 0.55F, 0.15F);
-	private static final SeasonValues BLOSSOM_FADE = new SeasonValues(0.0F, 0.0F, 0.0F, 0.5F);
+	private static final int CHERRY_GREY = 0xC1FFE3;
+	private static final SeasonValues CHERRY_GREY_AMOUNT = new SeasonValues(0.0F, 0.0F, 0.0F, 0.7F);
+	private static final SeasonValues CHERRY_FADE = new SeasonValues(0.0F, 0.0F, 0.0F, 0.3F);
+	/**
+	 * The same for azalea, whose green (the texture averages #5A732C) gets a pink tint instead. Its texture has too little
+	 * blue to reach grey, so it goes a dormant olive-brown, with less of the biome's winter colour than of its autumn one
+	 * so it does not turn murky. Flowering azalea gets exactly the same colour all year: the two are mixed in one tree,
+	 * and anything gentler left those trees patchy in autumn.
+	 */
+	private static final int AZALEA_DORMANT = 0xFFC8FF;
+	private static final SeasonValues AZALEA_DORMANT_AMOUNT = new SeasonValues(0.0F, 0.0F, 0.0F, 1.0F);
+	private static final SeasonValues AZALEA_LEAVES = new SeasonValues(0.0F, 0.0F, 1.0F, 0.6F);
 	private static final int WHITE = 0xFFFFFF;
 
 	private BiomeSync() {
@@ -60,7 +71,7 @@ public final class BiomeSync {
 	 * Birch and spruce leaves only change for players with Seasonfall installed: an unmodified game colours them the same
 	 * everywhere, whatever it is sent.
 	 */
-	public record Look(float temperature, int grass, int foliage, int birch, int spruce, int leafOverlay, int blossomOverlay) {
+	public record Look(float temperature, int grass, int foliage, int birch, int spruce, int azaleaOverlay, int cherryOverlay) {
 	}
 
 	/**
@@ -76,8 +87,8 @@ public final class BiomeSync {
 		int foliage = normal.foliage();
 		int birch = normal.birch();
 		int spruce = normal.spruce();
-		int leafOverlay = normal.leafOverlay();
-		int blossomOverlay = normal.blossomOverlay();
+		int azaleaOverlay = normal.azaleaOverlay();
+		int cherryOverlay = normal.cherryOverlay();
 		Palette palette = palette(profile.style());
 		if (config.visuals.grassColorChanges) {
 			grass = tint(grass, palette.grassColors(), palette.grassStrengths(), colorPhase, profile.grassChange());
@@ -94,15 +105,17 @@ public final class BiomeSync {
 			Palette evergreen = palette(BiomeStyle.EVERGREEN);
 			spruce = tint(spruce, evergreen.foliageColors(), evergreen.foliageStrengths(), colorPhase,
 					profile.seasonStrength() * BiomeStyle.EVERGREEN.foliageChange());
-			leafOverlay = tint(WHITE, palette.foliageColors(), palette.foliageStrengths(), colorPhase,
-					profile.foliageChange() * TEXTURED_LEAVES.at(colorPhase));
-			int faded = tint(WHITE, palette.foliageColors(), palette.foliageStrengths(), colorPhase,
-					profile.foliageChange() * BLOSSOM_FADE.at(colorPhase));
-			blossomOverlay = multiply(faded, ColorMaps.blend(WHITE, BLOSSOM_GOLD, profile.foliageChange() * BLOSSOM_GOLD_AMOUNT.at(colorPhase)));
+			int dormant = ColorMaps.blend(WHITE, AZALEA_DORMANT, profile.foliageChange() * AZALEA_DORMANT_AMOUNT.at(colorPhase));
+			azaleaOverlay = multiply(dormant, tint(WHITE, palette.foliageColors(), palette.foliageStrengths(), colorPhase,
+					profile.foliageChange() * AZALEA_LEAVES.at(colorPhase)));
+			int gold = ColorMaps.blend(WHITE, CHERRY_GOLD, profile.foliageChange() * CHERRY_GOLD_AMOUNT.at(colorPhase));
+			int grey = ColorMaps.blend(WHITE, CHERRY_GREY, profile.foliageChange() * CHERRY_GREY_AMOUNT.at(colorPhase));
+			cherryOverlay = multiply(multiply(grey, gold), tint(WHITE, palette.foliageColors(), palette.foliageStrengths(), colorPhase,
+					profile.foliageChange() * CHERRY_FADE.at(colorPhase)));
 		}
 		// Seasonal snow switched off on the server: players should see the rain that actually falls
 		boolean seasonalTemperature = config.visuals.sendSeasonalTemperature && config.snow.seasonalSnowPersistence;
-		return new Look(seasonalTemperature ? temperature : profile.baseTemperature(), grass, foliage, birch, spruce, leafOverlay, blossomOverlay);
+		return new Look(seasonalTemperature ? temperature : profile.baseTemperature(), grass, foliage, birch, spruce, azaleaOverlay, cherryOverlay);
 	}
 
 	/**
@@ -186,7 +199,7 @@ public final class BiomeSync {
 		server.registryAccess().registryOrThrow(Registries.BIOME).holders().forEach(holder -> {
 			Look look = liveLook(holder, colorPhase, seasonal, ops);
 			entries.add(new BiomeSeasonPayload.Entry(holder.key().location(), look.temperature(), look.grass(), look.foliage(), look.birch(),
-					look.spruce(), look.leafOverlay(), look.blossomOverlay()));
+					look.spruce(), look.azaleaOverlay(), look.cherryOverlay()));
 		});
 		List<BiomeSeasonPayload> pages = new ArrayList<>();
 		for (int start = 0; start < entries.size(); start += BiomeSeasonPayload.MAX_PAGE_SIZE) {
