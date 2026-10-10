@@ -74,9 +74,9 @@ put the same jar in players' `mods` folders for live updates.
 
 | Loader | 26.3 | 26.2 |
 |---|---|---|
-| Fabric | `seasonfall-fabric-1.0.0+26.3.jar` | `seasonfall-fabric-1.0.0+26.2.jar` |
-| NeoForge | `seasonfall-neoforge-1.0.0+26.3.jar` | `seasonfall-neoforge-1.0.0+26.2.jar` |
-| Forge | `seasonfall-forge-1.0.0+26.3.jar` | `seasonfall-forge-1.0.0+26.2.jar` |
+| Fabric | `seasonfall-fabric-1.1.0+26.3.jar` | `seasonfall-fabric-1.1.0+26.2.jar` |
+| NeoForge | `seasonfall-neoforge-1.1.0+26.3.jar` | `seasonfall-neoforge-1.1.0+26.2.jar` |
+| Forge | `seasonfall-forge-1.1.0+26.3.jar` | `seasonfall-forge-1.1.0+26.2.jar` |
 
 The year is saved in `seasonfall.json` in the world folder and survives restarts.
 
