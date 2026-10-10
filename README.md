@@ -86,6 +86,7 @@ The year is saved in `seasonfall.json` in the world folder and survives restarts
 changes. Main sections:
 
 - `general`: on/off, whether the year advances, whether it waits while nobody is online (`pauseWhenEmpty`, on by default), starting season
+  (`startingSeason`: `random` by default, picked from the world seed, or a fixed season)
 - `seasonLength`: days per season (24 each by default)
 - `dimensions`: which dimensions have seasons (overworld only by default)
 - `temperature`: the yearly temperature curve

@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
+import dev.romoslayer.seasonfall.api.Season;
 import java.io.StringReader;
+import java.util.EnumSet;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class SeasonfallConfigTest {
@@ -28,6 +31,38 @@ class SeasonfallConfigTest {
 		// A file from before the option existed still gets it
 		assertTrue(parse("{ general: { enabled: true } }", new Problems()).general.pauseWhenEmpty);
 		assertFalse(parse("{ general: { pauseWhenEmpty: false } }", new Problems()).general.pauseWhenEmpty);
+	}
+
+	@Test
+	void startingSeasonIsRandomByDefault() {
+		SeasonfallConfig config = parse("{}", new Problems());
+		assertEquals(SeasonfallConfig.RANDOM_SEASON, config.general.startingSeason);
+		// The same seed always starts in the same season, and different seeds reach all four
+		assertEquals(config.startingSeason(12345L), config.startingSeason(12345L));
+		Set<Season> seen = EnumSet.noneOf(Season.class);
+		for (long seed = 0; seed < 200; seed++) {
+			seen.add(config.startingSeason(seed));
+		}
+		assertEquals(EnumSet.allOf(Season.class), seen);
+	}
+
+	@Test
+	void fixedStartingSeasonIgnoresTheSeed() {
+		SeasonfallConfig config = parse("{ general: { startingSeason: \"Autumn\" } }", new Problems());
+		for (long seed = 0; seed < 50; seed++) {
+			assertEquals(Season.AUTUMN, config.startingSeason(seed));
+		}
+		Problems problems = new Problems();
+		parse("{ general: { startingSeason: \"RANDOM\" } }", problems);
+		assertTrue(problems.isEmpty(), problems.messages().toString());
+	}
+
+	@Test
+	void unknownStartingSeasonBecomesRandom() {
+		Problems problems = new Problems();
+		SeasonfallConfig config = parse("{ general: { startingSeason: \"monsoon\" } }", problems);
+		assertEquals(SeasonfallConfig.RANDOM_SEASON, config.general.startingSeason);
+		assertFalse(problems.isEmpty());
 	}
 
 	@Test
