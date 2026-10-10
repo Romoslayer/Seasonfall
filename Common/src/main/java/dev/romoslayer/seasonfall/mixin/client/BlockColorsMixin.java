@@ -36,9 +36,9 @@ public abstract class BlockColorsMixin {
 	 */
 	@ModifyExpressionValue(method = "createDefault", at = @At(value = "NEW", target = "()Lnet/minecraft/client/color/block/BlockColors;"))
 	private static BlockColors seasonfall$texturedLeaves(BlockColors colors) {
-		colors.register(SeasonalTints.overlay(SeasonalTints.LEAF_OVERLAY), Blocks.AZALEA_LEAVES);
-		// Their flowers are in the same texture: a gentler, warmer overlay keeps them from turning red
-		colors.register(SeasonalTints.overlay(SeasonalTints.BLOSSOM_OVERLAY), Blocks.CHERRY_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES);
+		colors.register(SeasonalTints.overlay(SeasonalTints.AZALEA_OVERLAY), Blocks.AZALEA_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES);
+		// Cherry blossoms are in the same texture: a gentler, warmer overlay keeps them from turning red
+		colors.register(SeasonalTints.overlay(SeasonalTints.CHERRY_OVERLAY), Blocks.CHERRY_LEAVES);
 		return colors;
 	}
 }

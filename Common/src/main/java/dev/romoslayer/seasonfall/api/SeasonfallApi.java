@@ -4,6 +4,7 @@ import dev.romoslayer.seasonfall.Seasonfall;
 import dev.romoslayer.seasonfall.climate.Climate;
 import dev.romoslayer.seasonfall.config.SeasonfallConfig;
 import dev.romoslayer.seasonfall.crop.CropGrowth;
+import dev.romoslayer.seasonfall.time.DayLength;
 import dev.romoslayer.seasonfall.time.SeasonClock;
 import dev.romoslayer.seasonfall.time.YearCalendar;
 import net.minecraft.core.BlockPos;
@@ -54,6 +55,19 @@ public final class SeasonfallApi {
 	public static int yearLengthDays() {
 		SeasonClock clock = Seasonfall.clock();
 		return clock == null ? 0 : (int) (clock.calendar().yearTicks() / YearCalendar.TICKS_PER_DAY);
+	}
+
+	/**
+	 * The share of a 24000-tick day that is daytime here right now: 0.5 for equal day and night, more in summer, less in
+	 * winter. For mods that keep time by place, such as Daybreak, to stretch each place's day themselves; with Daybreak
+	 * installed Seasonfall leaves the speed of the overworld's time of day alone. 0.5 when Seasonfall is off, seasonal day
+	 * length is switched off, or the dimension has no seasons.
+	 */
+	public static float daytimeFraction(ServerLevel level) {
+		if (!hasSeasons(level) || !SeasonfallConfig.get().dayLength.seasonalDayLength) {
+			return 0.5F;
+		}
+		return DayLength.daytimeFraction(yearProgress());
 	}
 
 	/** Whether this dimension has seasons at all. */

@@ -18,7 +18,7 @@ import net.minecraft.resources.ResourceLocation;
  * proxy, say) simply does not announce this one.
  */
 public record BiomeSeasonPayload(List<Entry> biomes) implements CustomPacketPayload {
-	public static final CustomPacketPayload.Type<BiomeSeasonPayload> TYPE = new CustomPacketPayload.Type<>(Seasonfall.id("biome_looks_mc1211_v1"));
+	public static final CustomPacketPayload.Type<BiomeSeasonPayload> TYPE = new CustomPacketPayload.Type<>(Seasonfall.id("biome_looks_mc1211_v2"));
 	/** Entries per payload: about 30 KB at most, far below any packet limit. */
 	public static final int MAX_PAGE_SIZE = 512;
 
@@ -28,11 +28,11 @@ public record BiomeSeasonPayload(List<Entry> biomes) implements CustomPacketPayl
 	 * @param foliage        leaf colour, 0xRRGGBB
 	 * @param birch          birch leaf colour, 0xRRGGBB
 	 * @param spruce         spruce leaf colour, 0xRRGGBB
-	 * @param leafOverlay    colour multiplied over azalea leaves, 0xRRGGBB (white: unchanged)
-	 * @param blossomOverlay colour multiplied over cherry and flowering azalea leaves, 0xRRGGBB (white: unchanged)
+	 * @param azaleaOverlay  colour multiplied over azalea and flowering azalea leaves, 0xRRGGBB (white: unchanged)
+	 * @param cherryOverlay  colour multiplied over cherry leaves, 0xRRGGBB (white: unchanged)
 	 */
-	public record Entry(ResourceLocation biome, float temperature, int grass, int foliage, int birch, int spruce, int leafOverlay,
-			int blossomOverlay) {
+	public record Entry(ResourceLocation biome, float temperature, int grass, int foliage, int birch, int spruce, int azaleaOverlay,
+			int cherryOverlay) {
 		// More fields than StreamCodec.composite takes on this version, so written out by hand
 		static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.of(Entry::write, Entry::read);
 
@@ -43,8 +43,8 @@ public record BiomeSeasonPayload(List<Entry> biomes) implements CustomPacketPayl
 			buf.writeInt(entry.foliage());
 			buf.writeInt(entry.birch());
 			buf.writeInt(entry.spruce());
-			buf.writeInt(entry.leafOverlay());
-			buf.writeInt(entry.blossomOverlay());
+			buf.writeInt(entry.azaleaOverlay());
+			buf.writeInt(entry.cherryOverlay());
 		}
 
 		private static Entry read(RegistryFriendlyByteBuf buf) {

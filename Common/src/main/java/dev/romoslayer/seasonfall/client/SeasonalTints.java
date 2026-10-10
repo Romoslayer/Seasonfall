@@ -18,10 +18,13 @@ public final class SeasonalTints {
 
 	public static final ColorResolver BIRCH = (biome, x, z) -> pick(seasonal(biome).seasonfall$clientBirch(), FoliageColor.getBirchColor());
 	public static final ColorResolver SPRUCE = (biome, x, z) -> pick(seasonal(biome).seasonfall$clientSpruce(), FoliageColor.getEvergreenColor());
-	/** Laid over leaves whose colour is in their texture; white (no change) until the server says otherwise. */
-	public static final ColorResolver LEAF_OVERLAY = (biome, x, z) -> pick(seasonal(biome).seasonfall$clientLeafOverlay(), WHITE);
-	/** The gentler overlay for blossoming leaves (cherry, flowering azalea). */
-	public static final ColorResolver BLOSSOM_OVERLAY = (biome, x, z) -> pick(seasonal(biome).seasonfall$clientBlossomOverlay(), WHITE);
+	/**
+	 * Laid over azalea and flowering azalea leaves, whose colour is in their texture; white (no change) until the server
+	 * says otherwise.
+	 */
+	public static final ColorResolver AZALEA_OVERLAY = (biome, x, z) -> pick(seasonal(biome).seasonfall$clientAzaleaOverlay(), WHITE);
+	/** The same for cherry leaves, which also turn grey in winter. */
+	public static final ColorResolver CHERRY_OVERLAY = (biome, x, z) -> pick(seasonal(biome).seasonfall$clientCherryOverlay(), WHITE);
 
 	private SeasonalTints() {
 	}

@@ -46,9 +46,12 @@ What changes colour:
 - **Birch, spruce, cherry, azalea and flowering azalea leaves:** only for players with Seasonfall installed. An
   unmodified game gives birch and spruce one fixed colour and takes the others' colour straight from their textures,
   which the server cannot change. With the mod, birch follows the biome's palette, spruce only shifts slightly (it keeps
-  its needles), and azalea keeps its own colour in spring and summer, then takes on the biome's autumn and winter
-  colours. Cherry and flowering azalea have their flowers in the same texture, so they only warm towards gold in autumn
-  (cherry goes peach, the azalea flowers stay pink) and fade a little in winter.
+  its needles), and azalea keeps its own colour in spring and summer, then takes on the biome's autumn colours and goes
+  a dormant olive-brown in winter. Flowering azalea always matches plain azalea, since the two grow mixed in one tree.
+  Cherry has its blossoms in the same texture, so it only warms to peach in autumn, then turns a soft pink-grey in
+  winter.
+- **Falling petals:** cherry petals drifting down from the trees take the same colour as the leaves above them, for
+  players with Seasonfall installed (on this version cherry is the only tree that drops anything).
 - **Unchanged:** lily pads and stems.
 
 Biome colours are per biome, not per dimension: if a dimension without seasons uses a biome that also appears in one
@@ -59,6 +62,10 @@ Modded biomes get seasons like vanilla ones, as long as a dimension with seasons
 the overworld). A biome that no seasonal dimension generates, for example one only placed with `/fillbiome`, keeps its
 normal look.
 
+**Terralith** works out of the box: its biomes are sorted into styles from their own climate and tags like any others
+(deserts and mesas stay dry, jungles barely change, its temperate forests and valleys get snow in winter). Its Skylands
+islands, each already themed after one season, are left without seasons, as Terralith asks of other seasons mods.
+
 ## Installing
 
 Put the jar for your loader in the server's `mods` folder (Fabric also needs Fabric API). Optionally put the same jar in
@@ -66,9 +73,9 @@ players' `mods` folders for live updates.
 
 | Loader | 1.21.1 |
 |---|---|
-| Fabric (Fabric API 0.116+) | `seasonfall-fabric-1.0.0+1.21.1.jar` |
-| NeoForge 21.1 | `seasonfall-neoforge-1.0.0+1.21.1.jar` |
-| Forge 52 | `seasonfall-forge-1.0.0+1.21.1.jar` |
+| Fabric (Fabric API 0.116+) | `seasonfall-fabric-1.1.0+1.21.1.jar` |
+| NeoForge 21.1 | `seasonfall-neoforge-1.1.0+1.21.1.jar` |
+| Forge 52 | `seasonfall-forge-1.1.0+1.21.1.jar` |
 
 The year is saved in `seasonfall.json` in the world folder and survives restarts.
 
@@ -78,6 +85,7 @@ The year is saved in `seasonfall.json` in the world folder and survives restarts
 changes. Main sections:
 
 - `general`: on/off, whether the year advances, whether it waits while nobody is online (`pauseWhenEmpty`, on by default), starting season
+  (`startingSeason`: `random` by default, picked from the world seed, or a fixed season)
 - `seasonLength`: days per season (24 each by default)
 - `dimensions`: which dimensions have seasons (overworld only by default)
 - `temperature`: the yearly temperature curve
@@ -114,6 +122,8 @@ allowed. `biomeOverrides` can change any of it per biome, for example:
 
 - Blocks: `seasonfall:crops/warm_season`, `seasonfall:crops/cool_season`, `seasonfall:crops/default`,
   `seasonfall:vegetation`, `seasonfall:greenhouse_glass`
+- Biomes: `seasonfall:without_seasons`, biomes that keep their normal look and climate all year. It holds Terralith's
+  Skylands (`#terralith:skylands`), which are already themed after one season each.
 
 Change them with a data pack like any other tag. The whole random tick of a block in a crop tag is sped up or slowed down, not only
 its growth, so only add plants whose random tick is about growing. Growth up to 4 times normal is supported: above 1, a
@@ -145,6 +155,7 @@ climate.stormProbabilityMultiplier();
 SeasonfallApi.yearProgress();         // 0..1
 SeasonfallApi.season();               // SPRING, SUMMER, AUTUMN, WINTER
 SeasonfallApi.seasonProgress();       // 0..1 through the current season
+SeasonfallApi.daytimeFraction(level); // share of the day that is daytime (0.5 = equal day and night)
 ```
 
 When no world is running, Seasonfall is off, or the place has no seasons, it reports `ClimateModifiers.NEUTRAL`. While

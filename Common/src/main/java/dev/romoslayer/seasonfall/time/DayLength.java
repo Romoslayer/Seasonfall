@@ -14,6 +14,12 @@ import net.minecraft.world.level.Level;
  * unmodified clients move the sun and moon to match.
  */
 public final class DayLength {
+	/**
+	 * Daybreak gives every place its own time of day, so one overworld time speed would stretch the wrong part of the day
+	 * far from spawn. With it installed the time of day is left alone and Daybreak applies {@link #daytimeFraction} per
+	 * place.
+	 */
+	public static final String DAYBREAK = "daybreak";
 	private static final long DAY = YearCalendar.TICKS_PER_DAY;
 	private static final long SUNSET = DAY / 2;
 
@@ -30,9 +36,14 @@ public final class DayLength {
 		return Keyframes.cyclic(middles, 0.5F, yearProgress);
 	}
 
+	/** The share of a 24000-tick day that is daytime at this point in the year (0.5 = equal day and night). */
+	public static float daytimeFraction(float yearProgress) {
+		return 0.5F * daytimeMultiplier(yearProgress);
+	}
+
 	public void tick(MinecraftServer server, float yearProgress) {
 		SeasonfallConfig config = SeasonfallConfig.get();
-		if (!config.general.enabled || !config.dayLength.seasonalDayLength) {
+		if (!config.general.enabled || !config.dayLength.seasonalDayLength || Seasonfall.platform().isModLoaded(DAYBREAK)) {
 			this.reset();
 			return;
 		}

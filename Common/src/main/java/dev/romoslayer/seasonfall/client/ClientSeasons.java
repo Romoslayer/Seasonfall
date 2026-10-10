@@ -37,9 +37,9 @@ public final class ClientSeasons {
 			float temperatureChange = entry.temperature() - biome.getBaseTemperature();
 			changed |= seasonal.seasonfall$clientGrass() != entry.grass() || seasonal.seasonfall$clientFoliage() != entry.foliage()
 					|| seasonal.seasonfall$clientBirch() != entry.birch() || seasonal.seasonfall$clientSpruce() != entry.spruce()
-					|| seasonal.seasonfall$clientLeafOverlay() != entry.leafOverlay() || seasonal.seasonfall$clientBlossomOverlay() != entry.blossomOverlay();
-			seasonal.seasonfall$setClientSeason(temperatureChange, entry.grass(), entry.foliage(), entry.birch(), entry.spruce(), entry.leafOverlay(),
-					entry.blossomOverlay());
+					|| seasonal.seasonfall$clientAzaleaOverlay() != entry.azaleaOverlay() || seasonal.seasonfall$clientCherryOverlay() != entry.cherryOverlay();
+			seasonal.seasonfall$setClientSeason(temperatureChange, entry.grass(), entry.foliage(), entry.birch(), entry.spruce(), entry.azaleaOverlay(),
+					entry.cherryOverlay());
 		}
 		Seasonfall.LOGGER.debug("Live season update for {} biomes{}", payload.biomes().size(), changed ? ", redrawing" : "");
 		if (changed) {

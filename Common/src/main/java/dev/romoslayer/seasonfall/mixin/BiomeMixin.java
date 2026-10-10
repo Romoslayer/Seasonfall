@@ -36,9 +36,9 @@ public abstract class BiomeMixin implements SeasonalBiome {
 	@Unique
 	private volatile int seasonfall$clientSpruce = NO_COLOR;
 	@Unique
-	private volatile int seasonfall$clientLeafOverlay = NO_COLOR;
+	private volatile int seasonfall$clientAzaleaOverlay = NO_COLOR;
 	@Unique
-	private volatile int seasonfall$clientBlossomOverlay = NO_COLOR;
+	private volatile int seasonfall$clientCherryOverlay = NO_COLOR;
 
 	/**
 	 * Every temperature check (snowfall, freezing, melting, rain or snow) goes through here. The game caches the value it
@@ -139,19 +139,19 @@ public abstract class BiomeMixin implements SeasonalBiome {
 	}
 
 	@Override
-	public int seasonfall$clientLeafOverlay() {
-		return this.seasonfall$clientLeafOverlay;
+	public int seasonfall$clientAzaleaOverlay() {
+		return this.seasonfall$clientAzaleaOverlay;
 	}
 
 	@Override
-	public int seasonfall$clientBlossomOverlay() {
-		return this.seasonfall$clientBlossomOverlay;
+	public int seasonfall$clientCherryOverlay() {
+		return this.seasonfall$clientCherryOverlay;
 	}
 
 	@Override
-	public void seasonfall$setClientSeason(float temperatureChange, int grass, int foliage, int birch, int spruce, int leafOverlay, int blossomOverlay) {
-		this.seasonfall$clientBlossomOverlay = blossomOverlay;
-		this.seasonfall$clientLeafOverlay = leafOverlay;
+	public void seasonfall$setClientSeason(float temperatureChange, int grass, int foliage, int birch, int spruce, int azaleaOverlay, int cherryOverlay) {
+		this.seasonfall$clientCherryOverlay = cherryOverlay;
+		this.seasonfall$clientAzaleaOverlay = azaleaOverlay;
 		this.seasonfall$clientBirch = birch;
 		this.seasonfall$clientSpruce = spruce;
 		this.seasonfall$clientTemperatureChange = temperatureChange;
