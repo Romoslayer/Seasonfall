@@ -155,6 +155,7 @@ climate.stormProbabilityMultiplier();
 SeasonfallApi.yearProgress();         // 0..1
 SeasonfallApi.season();               // SPRING, SUMMER, AUTUMN, WINTER
 SeasonfallApi.seasonProgress();       // 0..1 through the current season
+SeasonfallApi.daytimeFraction(level); // share of the day that is daytime (0.5 = equal day and night)
 ```
 
 When no world is running, Seasonfall is off, or the place has no seasons, it reports `ClimateModifiers.NEUTRAL`. While
@@ -182,14 +183,20 @@ winter comes back with about a third of the growth of one left alone through sum
 time while the server was off, that time is treated as game time before the absence (the year does not move while the
 server is off), which is an approximation. Elapsed's `[seasonfall] integrationEnabled` option turns the link off.
 
+### Daybreak
+
+With [Daybreak](../Daybreak) (day and night by east-west position) installed, Seasonfall leaves the overworld clock's
+speed alone, and Daybreak stretches each place's own day to the season's length using `daytimeFraction`. Nothing to set
+up on either side; `dayLength.seasonalDayLength` still switches seasonal day length off.
+
 ## Things to know
 
 - The year only moves while someone is online (`general.pauseWhenEmpty`, on by default). Most servers stop ticking
   anyway once empty (`pause-when-empty-seconds` in `server.properties`); this also holds the year on servers that keep
   running. Turn it off to let the seasons pass on an empty server that keeps running.
 
-- Seasonal day length takes over the overworld clock's speed (`/time rate`). Turn off `dayLength.seasonalDayLength` if
-  you use `/time rate` yourself.
+- Seasonal day length takes over the overworld clock's speed (`/time rate`), except with Daybreak installed. Turn off
+  `dayLength.seasonalDayLength` if you use `/time rate` yourself.
 - Exposed snow layers and ice in seasonal biomes melt when it is warm, including player-placed ones. Use packed or blue
   ice, or put a roof over them.
 - New chunks generate with each biome's normal climate; seasonal snow and ice only come from weather afterwards.
