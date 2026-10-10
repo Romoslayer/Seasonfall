@@ -235,4 +235,5 @@ Seasonfall contains no code from Serene Seasons or any other seasons mod.
 
 ## Licence
 
-MIT. See `LICENSE`.
+[PolyForm Shield 1.0.0](https://polyformproject.org/licenses/shield/1.0.0): you may use, change and share Seasonfall for
+any purpose except making something that competes with it. See `LICENSE` for the exact terms.
