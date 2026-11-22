@@ -30,6 +30,27 @@ public final class Keyframes {
 		return from + (to - from) * blend;
 	}
 
+	/**
+	 * Four values, one per quarter of the year, each held flat through the middle {@code hold} of its quarter (0 to 1). The
+	 * rest is a smooth blend centred on the turn of each quarter, so a value set for a season applies to nearly all of it.
+	 */
+	public static float held(float first, float second, float third, float fourth, float hold, float phase) {
+		float position = phase * 4.0F;
+		int index = (int) Math.floor(position);
+		float within = position - index;
+		float edge = (1.0F - hold) * 0.5F;
+		float current = pick(Math.floorMod(index, 4), first, second, third, fourth);
+		if (within < edge) {
+			float previous = pick(Math.floorMod(index - 1, 4), first, second, third, fourth);
+			return previous + (current - previous) * ease((within + edge) / (2.0F * edge));
+		}
+		if (within > 1.0F - edge) {
+			float next = pick(Math.floorMod(index + 1, 4), first, second, third, fourth);
+			return current + (next - current) * ease((within - (1.0F - edge)) / (2.0F * edge));
+		}
+		return current;
+	}
+
 	private static float pick(int index, float first, float second, float third, float fourth) {
 		return switch (index) {
 			case 0 -> first;

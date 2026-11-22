@@ -34,6 +34,14 @@ public final class SeasonValues {
 	}
 
 	/**
+	 * The value at a point in the year when each season's value holds through the middle {@code hold} of the season (0 to
+	 * 1) and only the rest blends into the next. Allocates nothing.
+	 */
+	public float heldAt(float yearProgress, float hold) {
+		return Keyframes.held(this.spring, this.summer, this.autumn, this.winter, hold, yearProgress);
+	}
+
+	/**
 	 * A copy where every season is a finite number within [min, max]. Missing or broken seasons take the matching
 	 * season of {@code fallback}; anything outside the range is clamped. Each change is reported to {@code problems}.
 	 */
