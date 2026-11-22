@@ -19,7 +19,7 @@ responds according to its own climate.
 | **Freezing** | Still water freezes the same way it does in snowy biomes: gradually, from the edges in. |
 | **Thaw** | Once a biome warms past the thaw temperature, snow open to the sky melts a layer at a time and exposed ice turns back into water, on the same random ticks the game uses to melt them next to a torch. Roofed/indoor snow and ice are left alone. |
 | **Foliage and grass** | Seasonal tints per biome style: light yellow-green spring leaves, deep summer green, autumn yellow-orange-brown leaves over olive-tawny grass, grey winter leaves and grass. Evergreen, tropical and arid biomes change much less. |
-| **Crops and plants** | Growth speed multipliers by crop group (default, warm-season, cool-season, general vegetation), scaled by how seasonal the local biome is. Crops under glass grow at least at normal speed all year. |
+| **Crops and plants** | Growth speed multipliers by crop group (default, warm-season, cool-season, general vegetation), scaled by how seasonal the local biome is. Each season's speed holds for most of that season and blends into the next around the turn of the season, so a speed of 0 stops growth for nearly the whole season. Crops under glass grow at least at normal speed all year. |
 | **Day length** | Longer days in summer, longer nights in winter. A full day still takes 24000 ticks. |
 | **Empty server** | The year waits while nobody is online and carries on when someone joins; the server itself keeps running. On by default (`general.pauseWhenEmpty`). |
 | **Vanilla weather** | Without Stormcell, rain and thunderstorms become more or less frequent through the year. |
@@ -73,9 +73,9 @@ players' `mods` folders for live updates.
 
 | Loader | 1.20.1 |
 |---|---|
-| Fabric (Fabric API 0.92+) | `seasonfall-fabric-1.1.0+1.20.1.jar` |
-| NeoForge 47.1 | `seasonfall-neoforge-1.1.0+1.20.1.jar` |
-| Forge 47 | `seasonfall-forge-1.1.0+1.20.1.jar` |
+| Fabric (Fabric API 0.92+) | `seasonfall-fabric-1.1.1+1.20.1.jar` |
+| NeoForge 47.1 | `seasonfall-neoforge-1.1.1+1.20.1.jar` |
+| Forge 47 | `seasonfall-forge-1.1.1+1.20.1.jar` |
 
 On 1.20.1 NeoForge is still a fork of Forge, so its jar is built from the same code as the Forge one.
 

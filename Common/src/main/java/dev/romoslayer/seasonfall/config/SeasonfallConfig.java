@@ -147,9 +147,11 @@ public final class SeasonfallConfig {
 		@Comment("Seasons speed up or slow down crop and plant growth.")
 		public boolean cropSeasonEffects = true;
 		@Comment("""
-				Growth speed for each group in the middle of each season (1 = normal, 0.5 = half, 1.2 = 20% faster); it changes
-				smoothly in between. Which crops are in which group is set by the block tags seasonfall:crops/warm_season,
-				seasonfall:crops/cool_season, seasonfall:crops/default and seasonfall:vegetation (checked in that order).""")
+				Growth speed for each group in each season (1 = normal, 0.5 = half, 1.2 = 20% faster, 0 = no growth). It holds for
+				most of the season and changes smoothly around the turn of each season. Biomes with milder seasons (wetland,
+				savanna, arid, tropical) move less far from normal; biomeOverrides cropSeasonality changes that. Which crops are in
+				which group is set by the block tags seasonfall:crops/warm_season, seasonfall:crops/cool_season,
+				seasonfall:crops/default and seasonfall:vegetation (checked in that order).""")
 		public Map<String, SeasonValues> groups = defaultCropGroups();
 		@Comment("Give single crops (vanilla or modded, by block id) a group name, or growth speeds of their own.")
 		public Map<String, JsonElement> cropOverrides = defaultCropOverrides();
