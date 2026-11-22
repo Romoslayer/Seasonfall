@@ -39,6 +39,47 @@ class KeyframesTest {
 	}
 
 	@Test
+	void heldValuesCoverMostOfTheirSeason() {
+		SeasonValues values = new SeasonValues(1.15F, 1.1F, 0.85F, 0.0F);
+		// Winter is 0.75 to 1: with 80% held, 0.775 to 0.975 is winter's own value
+		assertEquals(0.0F, values.heldAt(0.78F, 0.8F), 1e-6);
+		assertEquals(0.0F, values.heldAt(0.875F, 0.8F), 1e-6);
+		assertEquals(0.0F, values.heldAt(0.97F, 0.8F), 1e-6);
+		assertEquals(1.1F, values.heldAt(0.3F, 0.8F), 1e-6);
+		// Halfway between two seasons at each turn of the season, either side of the year's end
+		assertEquals(0.85F / 2, values.heldAt(0.75F, 0.8F), 1e-5);
+		assertEquals(1.15F / 2, values.heldAt(0.0F, 0.8F), 1e-5);
+		assertEquals(values.heldAt(0.0F, 0.8F), values.heldAt(1.0F, 0.8F), 1e-5);
+		// Nothing held: the same as the plain smooth curve
+		for (float phase = 0.0F; phase < 1.0F; phase += 0.01F) {
+			assertEquals(values.at(phase), values.heldAt(phase, 0.0F), 1e-5);
+		}
+	}
+
+	@Test
+	void heldValuesHaveNoJumps() {
+		SeasonValues values = new SeasonValues(1.15F, 4.0F, 0.85F, 0.0F);
+		float previous = values.heldAt(0.0F, 0.8F);
+		for (int i = 1; i <= 10000; i++) {
+			float now = values.heldAt(i / 10000.0F, 0.8F);
+			assertTrue(Math.abs(now - previous) < 0.01F, "jump at " + i);
+			previous = now;
+		}
+	}
+
+	@Test
+	void winterAtZeroBarelyGrowsAllWinter() {
+		SeasonValues values = new SeasonValues(1.15F, 1.1F, 0.85F, 0.0F);
+		double sum = 0;
+		int samples = 10000;
+		for (int i = 0; i < samples; i++) {
+			sum += values.heldAt(0.75F + 0.25F * i / samples, 0.8F);
+		}
+		// Only the blends at either end of winter grow at all (it was about 0.18 when only midwinter reached 0)
+		assertTrue(sum / samples < 0.04, "winter average " + sum / samples);
+	}
+
+	@Test
 	void coloursBlendPerChannel() {
 		assertEquals(0x808080, ColorMaps.blend(0x000000, 0xFFFFFF, 0.5F), 0x010101);
 		assertEquals(0x123456, ColorMaps.blend(0x123456, 0xFFFFFF, 0.0F));

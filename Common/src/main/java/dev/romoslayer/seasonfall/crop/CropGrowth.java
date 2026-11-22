@@ -38,6 +38,11 @@ public final class CropGrowth {
 	public static final TagKey<Block> DEFAULT = tag("crops/default");
 	public static final TagKey<Block> VEGETATION = tag("vegetation");
 	public static final TagKey<Block> GREENHOUSE_GLASS = tag("greenhouse_glass");
+	/**
+	 * How much of each season grows at that season's configured speed; the rest blends into the neighbouring seasons
+	 * around the turn of the season. A winter speed of 0 therefore stops growth for nearly all of winter.
+	 */
+	public static final float SEASON_HOLD = 0.8F;
 	private static final Gson GSON = new Gson();
 
 	/** Each block's growth curve, worked out the first time it random-ticks. Empty for blocks that are not plants. */
@@ -171,7 +176,7 @@ public final class CropGrowth {
 
 	private record Growth(SeasonValues curve, float strength) {
 		float at(float yearProgress) {
-			return GrowthTicks.scaled(this.curve.at(yearProgress), this.strength);
+			return GrowthTicks.scaled(this.curve.heldAt(yearProgress, SEASON_HOLD), this.strength);
 		}
 	}
 

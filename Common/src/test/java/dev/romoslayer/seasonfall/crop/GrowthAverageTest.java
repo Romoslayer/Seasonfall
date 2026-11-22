@@ -18,7 +18,7 @@ class GrowthAverageTest {
 	private static double average(SeasonHistory history, long end, long elapsed) {
 		long yearTicks = new YearCalendar(0, LENGTHS).yearTicks();
 		return GrowthAverage.over(end, elapsed, yearTicks,
-				gameTime -> DEFAULT_GROUP.at(new YearCalendar(history.seasonAt(gameTime), LENGTHS).yearProgress()));
+				gameTime -> DEFAULT_GROUP.heldAt(new YearCalendar(history.seasonAt(gameTime), LENGTHS).yearProgress(), CropGrowth.SEASON_HOLD));
 	}
 
 	@Test
@@ -51,7 +51,7 @@ class GrowthAverageTest {
 		}
 		double sum = 0;
 		for (int i = 0; i < 10000; i++) {
-			sum += DEFAULT_GROUP.at(i / 10000.0F);
+			sum += DEFAULT_GROUP.heldAt(i / 10000.0F, CropGrowth.SEASON_HOLD);
 		}
 		assertEquals(sum / 10000, average(history, year, year), 0.01);
 	}
